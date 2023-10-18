@@ -15,8 +15,8 @@ Group: &nbsp;&nbsp;`Crosscut_7`
 
 <table>
 <tr><th>Nome</th><th>Número mecanográfico</th><th>Contribuição</th></tr>
-<tr><td>Diogo Tomás Valente Fernandes</td><td>up202208752</td><td>9999999%</td></tr>
-<tr><td>Hélder Gabriel Santos Costa</td><td>up202108719</td><td>9999999%</td></tr>
+<tr><td>Diogo Tomás Valente Fernandes</td><td>up202108752</td><td>9999999%</td></tr>
+<tr><td>Hélder Gabriel Silva Costa</td><td>up202108719</td><td>9999999%</td></tr>
 </table>
 
 ## Installation and Execution
