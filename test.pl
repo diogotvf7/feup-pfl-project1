@@ -1,3 +1,5 @@
+# :- use_module(library(system)).
+
 test :-
     write('\e[1;31m This is red text \e[0m'), nl,
     write('\e[1;34m This is red text \e[0m'), nl,
@@ -10,3 +12,23 @@ test :-
     write('\e[5;91m This is blinking red text \e[0m'), nl,
     write('\e[5;94m This is blinking blue text \e[0m'), nl
     .
+
+get_x(X, Limit):-
+    X < LIMIT,
+    X > 0,
+    !.
+get_x(X, Limit):-
+    write('\e[91m Column: \e[0m'),
+    get_char(X), skip_line,
+    get_x(X, Limit).
+
+get_y(Y, Limit):-
+    write('\e[94m    Row: \e[0m'),
+    get_char(Y), skip_line.
+
+read_move(MOVE, LIMIT):-
+    get_x(X).
+    % MOVE = (X-Y).
+
+:-
+    read_move(MOVE, 10).

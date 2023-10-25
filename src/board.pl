@@ -18,5 +18,5 @@ create_board(N, I, ELEMENT, BOARD) :-
 
 % ------------------------------------------------------ GET ELEMENT
 get_element(X, Y, BOARD, ELEMENT) :-
-    nth1(Y, BOARD, LINE),
-    nth1(X, LINE, ELEMENT).
+    nth0(Y, BOARD, LINE),
+    nth0(X, LINE, ELEMENT).

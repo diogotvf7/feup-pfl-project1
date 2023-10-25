@@ -6,8 +6,8 @@ final(State):-
     winning_condition(State).
 
 % ----------------------------------------------------- MOVE
-move(OldState, NewState):- 
-    valid_move(OldState, NewState).
+move(State, NewState):-
+    valid_move(State, NewState),
 
 % ----------------------------------------------------- PLAY
 play:- 
@@ -27,8 +27,12 @@ play(Curr, Path, States):-
 
 
 
-
-
+    % ___
+    % |    read_move(player, move)
+    % |    check(move)
+    % if true
+    % |    update(move, board, )
+    % else go read_move
 
 
 
