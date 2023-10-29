@@ -1,23 +1,46 @@
 valid_move(State, NewState):-
-    length(State, Size),
-    read_move(Move, Size),                                        % <- Implementar
-    check_valid_move(State, Move),                          % <- Verificar as regras do jogo / Implementar
-    update_board(State, Move, NewState).                    % <- Colocar a peça
+    game_state_pack(State, Board, Player, Opponent),
+    length(Board, Size),
+    read_move(Size, Move),
+    (check_valid_move(State, Move) ->
+        update_board(State, Move, NewState)
+        ;
+        write('Invalid move!\n'),
+        valid_move(State, NewState)
+    ).
 
- 
-    %1- qualquer move é legal dentro do board excetuando o perimetro;
-    %2- jogadas no perimetro, ou seja lugares com [x,0] ou [0,x] só podem ser usados se permitirem flipping e 
-    %devem ser retirados depois. As edges devem estar sempre limpas;
+check_valid_move(State, Move):-
+    game_state_pack(State, Board, Player, Opponent),
+    Move = (Row-Column),
+    nth0(Row, Board, BoardRow),
+    nth0(BoardColumn, BoardRow, Element),
+    Element == ' '.
+
+update_board(State, Move, NewState):-
+    Move = (Row-Column),
+    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    (CurrentPlayer = player1 ->
+        place_disc(Row, Column, '1', Board, NewBoard);
+        place_disc(Row, Column, '2', Board, NewBoard)
+    ),
+    game_state_pack(NewState, NewBoard, Opponent, CurrentPlayer).
 
 
+place_disc(0, Column, Element, [H|B], [NewH|B]):-
+    place_disc(Column, Element, H, NewH),
+    !.
+place_disc(Row, Column, Element, [H|B], [H|NewB]):-
+    Row > 0,
+    Row1 is Row - 1,
+    place_disc(Row1, Column, Element, B, NewB).
 
-place(BOARD, X, Y, ELEMENT, NEW_BOARD) :-
-    nth0(Y, BOARD, ROW),
-    place(X, ELEMENT, ROW, NEW_ROW),
-    place(Y, NEW_ROW, BOARD, NEW_BOARD).
-
-place(1, ELEMENT, [_|T], [ELEMENT|T]) :- !.
-place(I, ELEMENT, [H|T], [H|NEW_T]) :-
-    I > 1,
+place_disc(0, Element, [_|B], [Element|B]) :- !.
+place_disc(I, Element, [H|B], [H|NewB]) :-
+    I > 0,
     I1 is I - 1,
-    place(I1, ELEMENT, T, NEW_T).
+    place_disc(I1, Element, B, NewB).
+
+% flipping()
+
+winning_condition(State):-
+    false.

@@ -1,5 +1,11 @@
+:- ['util.pl'].
+:- ['board.pl'].
+:- ['game_logic.pl'].
+
 % ----------------------------------------------------- INITIAL
-initial(InitialState).
+initial(Size, InitialState):-
+    create_board(Size, ' ', Board),
+    game_state_pack(InitialState, Board, player1, player2).
 
 % ----------------------------------------------------- FINAL
 final(State):- 
@@ -7,11 +13,13 @@ final(State):-
 
 % ----------------------------------------------------- MOVE
 move(State, NewState):-
-    valid_move(State, NewState),
+    valid_move(State, NewState).
 
 % ----------------------------------------------------- PLAY
 play:- 
-    initial(Init),
+    write('Size of board: '), nl,
+    get_int(Size, 5, 10), 
+    initial(Size, Init),
     play(Init, [Init], States),
     reverse(States, Path), write(Path).
 
@@ -19,8 +27,10 @@ play(Curr, Path, Path):-
     final(Curr), !.
 
 play(Curr, Path, States):- 
+    game_state_pack(Curr, Board, Player1, Player2),
+    display_game(Board),
     move(Curr, Next),
-    not( member(Next, Path) ),
+    % not( member(Next, Path) ),
     play(Next, [Next|Path], States).
 
 
@@ -38,29 +48,6 @@ play(Curr, Path, States):-
 
 
 
-
-
-
-
-% play :-
-%     % cls,
-%     % ask_question(['Choose your mode:', 
-%     %             '     1. Human      x      Human',
-%     %             '     2. Human      x      Computer',
-%     %             '     3. Computer   x      Human',
-%     %             '     4. Computer   x      Computer',
-%     %             ],
-%     %             MODE),
-%     % cls,
-%     % ask_question(['Choose the size of the board:',
-%     %             '     1. 8x8',
-%     %             '     2. 9x9',
-%     %             '     3. 10x10'],
-%     %             SIZE),
-%     % cls,
-%     build_board_line_1(BL, 3),
-%     write(BL),
-%     get_char(_).
 
 
 % % -----------------------------------------------------

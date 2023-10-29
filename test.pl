@@ -1,34 +1,25 @@
-# :- use_module(library(system)).
+% :- use_module(library(between)).
 
-test :-
-    write('\e[1;31m This is red text \e[0m'), nl,
-    write('\e[1;34m This is red text \e[0m'), nl,
-    write('\e[5m Blinking text \e[0m'), nl,
-    write('\e[2m Faint or decreased intensity \e[0m'), nl,
-    write('\e[38;2;255;0;0m This is super red \e[0m'), nl,
-    write('\e[38;2;0;255;0m This is super green \e[0m'), nl,
-    write('\e[38;2;0;0;255m This is super blue \e[0m'), nl,
-    write('\e[38;2;138;40;137m This is purple \e[0m'), nl,
-    write('\e[5;91m This is blinking red text \e[0m'), nl,
-    write('\e[5;94m This is blinking blue text \e[0m'), nl
-    .
+% place_disc(Row, Column, Element, Board, NewBoard):-
+%     replace(Row, Column, Element, Board, NewBoard, 0).
 
-get_x(X, Limit):-
-    X < LIMIT,
-    X > 0,
+place_disc(0, Column, Element, [H|B], [NewH|B]):-
+    place_disc(Column, Element, H, NewH),
     !.
-get_x(X, Limit):-
-    write('\e[91m Column: \e[0m'),
-    get_char(X), skip_line,
-    get_x(X, Limit).
+place_disc(Row, Column, Element, [H|B], [H|NewB]):-
+    Row > 0,
+    Row1 is Row - 1,
+    place_disc(Row1, Column, Element, B, NewB).
 
-get_y(Y, Limit):-
-    write('\e[94m    Row: \e[0m'),
-    get_char(Y), skip_line.
+place_disc(0, Element, [_|B], [Element|B]) :- !.
+place_disc(I, Element, [H|B], [H|NewB]) :-
+    I > 0,
+    I1 is I - 1,
+    place_disc(I1, Element, B, NewB).
 
-read_move(MOVE, LIMIT):-
-    get_x(X).
-    % MOVE = (X-Y).
+% -------------------------------------------------------------------------------
 
 :-
-    read_move(MOVE, 10).
+    trace,
+    place_disc(3, 3, 'X', [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]], NewBoard),
+    write('NewBoard: '), nl.

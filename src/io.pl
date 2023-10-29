@@ -1,23 +1,42 @@
+% ------------------------------------------------------ GET INT
+
+get_int(N):- 
+    get_int(0, N).
+
+get_int(N, Bottom, Top):-
+    get_int(0, Input),
+    (between(Bottom, Top, Input) -> N = Input; get_int(N, Top, Bottom)).
+
+get_int(N, N):- 
+    peek_code(10), 
+    get_code(10), 
+    !.
+    
+get_int(Current, Result):-
+    get_code(Input),
+    between(48, 57, Input),
+    New is Current * 10 + (Input - 48),
+    get_int(New, Result).
+
+
 % ------------------------------------------------------ READ INPUT
 
-get_x(X, Limit):-
-    X < LIMIT,
-    X > 0,
-    !.
-get_x(X, Limit):-
+read_column(Size, Column) :-
     write('\e[91m Column: \e[0m'),
-    get_char(X), skip_line,
-    get_x(X, Limit).
+    get_int(Input),
+    (Input > 0, Input =< Size -> Column = Input; read_column(Size, Column)).
 
-get_y(Y, Limit):-
+read_row(Size, Row) :-
     write('\e[94m    Row: \e[0m'),
-    get_char(Y), skip_line.
+    get_int(Input),
+    (Input > 0, Input =< Size -> Row = Input; read_row(Size, Row)).
 
-read_move(MOVE, LIMIT):-
-    get_x(X).
-    MOVE = (X-Y).
+read_move(Size, Move) :-
+    read_row(Size, Row),
+    read_column(Size, Column),
+    Move = (Row-Column).
 
-% ------------------------------------------------------ PRINT BOARD
+% ------------------------------------------------------ DISPLAY GAME
 
 print_top_indexes(N):-
     write('     '),
@@ -55,34 +74,34 @@ print_separator_line(N, I):-
     write('\e[97m----\e[0m'),
     print_separator_line(N, I1).
 
-print_line(LINE):-
-    length(LINE, N),
-    print_line(N, 0, LINE).
+print_line(Line):-
+    length(Line, N),
+    print_line(N, 0, Line).
 print_line(_, _, []) :- 
     write('\e[97m|\e[0m'),
     nl,
     !.
-print_line(N, X, [FELEMENT | REST]):-
+print_line(N, X, [FirstElement | Rest]):-
     X =< N,
     X1 is X + 1,
     write('\e[97m| \e[0m'),
-    display_piece(FELEMENT),
+    display_piece(FirstElement),
     write(' '),
-    print_line(N, X1, REST).
+    print_line(N, X1, Rest).
 
-print_board(BOARD):-
-    length(BOARD, N),
+display_game(State):-
+    length(State, N),
     print_top_indexes(N),
-    print_board(N, 0, BOARD).
-print_board(N, Y, []):-
+    display_game(N, 0, State).
+display_game(N, Y, []):-
     print_separator_line(N), nl.
-print_board(N, Y, [FLINE | REST]):-
+display_game(N, Y, [FirstLine | Rest]):-
     Y =< N,
     Y1 is Y + 1,
     print_separator_line(N),
     print_side_index(Y),
-    print_line(FLINE),
-    print_board(N, Y1, REST).
+    print_line(FirstLine),
+    display_game(N, Y1, Rest).
 
 % ------------------------------------------------------ CLEAR SCREEN    
 cls :- write('\33\[2J').
