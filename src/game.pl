@@ -5,7 +5,7 @@
 % ----------------------------------------------------- INITIAL
 initial(Size, InitialState):-
     create_board(Size, ' ', Board),
-    game_state_pack(InitialState, Board, player1, player2).
+    game_state_pack(InitialState, Board, '1', '2').
 
 % ----------------------------------------------------- FINAL
 final(State):- 
