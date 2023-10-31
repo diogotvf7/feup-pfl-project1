@@ -24,12 +24,12 @@ get_int(Current, Result):-
 read_column(Size, Column) :-
     write('\e[91m Column: \e[0m'),
     get_int(Input),
-    (Input > 0, Input =< Size -> Column = Input; read_column(Size, Column)).
+    (Input >= 0, Input < Size -> Column = Input; read_column(Size, Column)).
 
 read_row(Size, Row) :-
     write('\e[94m    Row: \e[0m'),
     get_int(Input),
-    (Input > 0, Input =< Size -> Row = Input; read_row(Size, Row)).
+    (Input >= 0, Input < Size -> Row = Input; read_row(Size, Row)).
 
 read_move(Size, Move) :-
     read_row(Size, Row),
@@ -89,10 +89,10 @@ print_line(N, X, [FirstElement | Rest]):-
     write(' '),
     print_line(N, X1, Rest).
 
-display_game(State):-
-    length(State, N),
+display_game(Board):-
+    length(Board, N),
     print_top_indexes(N),
-    display_game(N, 0, State).
+    display_game(N, 0, Board).
 display_game(N, Y, []):-
     print_separator_line(N), nl.
 display_game(N, Y, [FirstLine | Rest]):-
