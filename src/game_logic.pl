@@ -1,34 +1,64 @@
+% valid_move(State, NewState):-
+%     game_state_pack(State, Board, Player, Opponent),
+%     length(Board, Size),
+%     read_move(Size, Move),
+%     Size1 is Size - 1,
+%     Move \= 0-X,
+%     Move \= Size1-X,
+%     Move \= X-0,
+%     Move \= X-Size1,
+%     mx_get(Move, Board, ' '),
+%     update_board(State, Move, S1),
+%     check_flanking(Move, S1, S2),
+%     switch_current_player(S2, NewState).
+
 valid_move(State, NewState):-
     game_state_pack(State, Board, Player, Opponent),
     length(Board, Size),
     read_move(Size, Move),
+    valid_move(Move, State, NewState).
+
+valid_move(Move, State, NewState):-
+    game_state_pack(State, Board, Player, Opponent),
+    length(Board, Size),
     Size1 is Size - 1,
-    Move \= 0-X,
-    Move \= Size1-X,
-    Move \= X-0,
-    Move \= X-Size1,
+    Move \= 0-X, Move \= Size1-X, Move \= X-0, Move \= X-Size1,
     mx_get(Move, Board, ' '),
     update_board(State, Move, S1),
-    check_flanking(Move, S1, S2),
+    check_flanking(Move, S1, S2, 0),
     switch_current_player(S2, NewState).
 
-valid_move(State, NewState):-
+valid_move(Move, State, NewState):-
+    game_state_pack(State, Board, Player, Opponent),
+    length(Board, Size),
+    Size1 is Size - 1,
+    Move = Row-Column,
+    (Row == 0; Row == Size1; Column == 0; Column == Size1),
+    check_flanking(Move, State, S1, 1),
+    switch_current_player(S1, NewState).
+
+valid_move(Move, State, NewState):-
     write('Invalid move!\n'),
     valid_move(State, NewState).
 
 % ------------------------------------------------------------------------------- CHECK FLANKING
-check_flanking(Start, State, NewState):-
-    check_segment(Start, up, State, S1, 0),
-    check_segment(Start, down, S1, S2, 0),
-    check_segment(Start, left, S2, S3, 0),
-    check_segment(Start, right, S3, NewState, 0).
+check_flanking(Start, State, NewState, IsPerimeter):-
+    check_segment(Start, up, State, S1, 0, IsPerimeter),
+    check_segment(Start, down, S1, S2, 0, IsPerimeter),
+    check_segment(Start, left, S2, S3, 0, IsPerimeter),
+    check_segment(Start, right, S3, NewState, 0, IsPerimeter).
 
 % ------------------------------------------------------------------------------- CHECK SEGMENT
-check_segment(Position, Direction, State, NewState, 0):-
+check_segment(Position, Direction, State, NewState, 0, 0):-
     check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength),
     FlankLength > CutLength.
 
-check_segment(Position, Direction, State, State, 0).
+check_segment(Position, Direction, State, NewState, 0, 1):-
+    check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength),
+    RealFlankLength is FlankLength - 1,
+    RealFlankLength > CutLength.
+
+check_segment(Position, Direction, State, State, 0, _).
 
 check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
