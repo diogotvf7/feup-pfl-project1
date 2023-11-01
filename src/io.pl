@@ -90,6 +90,7 @@ print_line(N, X, [FirstElement | Rest]):-
     print_line(N, X1, Rest).
 
 display_game(Board):-
+    cls,
     length(Board, N),
     print_top_indexes(N),
     display_game(N, 0, Board).

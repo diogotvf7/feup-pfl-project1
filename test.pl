@@ -36,47 +36,43 @@ check_flanking(Start, State, NewState):-
 
 % ------------------------------------------------------------------------------- CHECK SEGMENT
 check_segment(Position, Direction, State, NewState, 0):-
-%     trace,
-    check_segment(Position, Direction, State, NewState, 0, FlankLength),
-    write('Segment length: '), write(FlankLength), nl
-    .
+    check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength),
+    FlankLength > CutLength.
 
-check_segment(Position, Direction, State, NewState, 0, FlankLength):-
-% check_segment(Position, Direction, State, NewState, 0):-
+check_segment(Position, Direction, State, State, 0).
+
+check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Piece),
     Piece == Opponent,
-    perpendicular(Direction, Perpendicular),                % <--- CHECK
-    count_cut(NewPosition, Perpendicular, State, Count),    % <--- CHECK
-    check_segment(NewPosition, Direction, State, S1, 1, FL),
-    % check_segment(NewPosition, Direction, State, S1, 1),
+    perpendicular(Direction, Perpendicular),
+    count_cut(NewPosition, Perpendicular, State, Count),
+    check_segment(NewPosition, Direction, State, S1, 1, FL, CL),
+    max(Count, CL, CutLength),
     update_board(S1, NewPosition, NewState),
-    FlankLength is FL + 1.
+    FlankLength is FL + 1,
+    !.
 
-check_segment(Position, Direction, State, State, 0, 0).
-% check_segment(Position, Direction, State, State, 0).
+check_segment(Position, Direction, State, State, 0, 0, 0).
 
-check_segment(Position, Direction, State, NewState, 1, FlankLength):-
-% check_segment(Position, Direction, State, NewState, 1):-
+check_segment(Position, Direction, State, NewState, 1, FlankLength, CutLength):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Piece),
     Piece == Opponent,
-    perpendicular(Direction, Perpendicular),                % <--- CHECK
-    count_cut(NewPosition, Perpendicular, State, Count),    % <--- CHECK
-    check_segment(NewPosition, Direction, State, S1, 1, FL),
-    % check_segment(NewPosition, Direction, State, S1, 1),
+    perpendicular(Direction, Perpendicular),
+    count_cut(NewPosition, Perpendicular, State, Count),
+    check_segment(NewPosition, Direction, State, S1, 1, FL, CL),
+    max(Count, CL, CutLength),
     update_board(S1, NewPosition, NewState),
     FlankLength is FL + 1.
 
-check_segment(Position, Direction, State, State, 1, 2):-
-% check_segment(Position, Direction, State, State, 1):-
+check_segment(Position, Direction, State, State, 1, 2, 0):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Piece),
     Piece == CurrentPlayer.
-    % FlankLength = 1.
     
 % ------------------------------------------------------------------------------- COUNT CUT
 count_cut(Position, vertical, State, Count):-
@@ -101,52 +97,44 @@ count_cut(Position, Direction, State, Count):-
 
 count_cut(Position, Direction, State, 0).
 
-% count_cut(Position, vertical, State, Count):-
-%     game_state_pack(State, Board, CurrentPlayer, Opponent),
-%     mx_delta(Position, up, NewPosition),
-%     mx_get(NewPosition, Board, Piece),
-%     Piece == Opponent,
-%     count_cut(NewPosition, vertical, State, Count1),
-%     Count is Count1 + 1.
+% -------------------------------------------------------------------------------
 
-% count_cut(Position, horizontal, State, Count):-
+% :-
+%     Board = [
+%              [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+%              [' ', '1', ' ', ' ', ' ', ' ', '1', ' '],
+%              [' ', '1', '1', ' ', '1', ' ', ' ', ' '],
+%              [' ', ' ', ' ', ' ', '2', ' ', ' ', ' '],
+%              [' ', ' ', '2', '2', '2', '2', '2', ' '],
+%              [' ', ' ', ' ', ' ', '2', ' ', ' ', ' '],
+%              [' ', '1', ' ', ' ', '1', ' ', ' ', ' '],
+%              [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+%             ], 
+%     game_state_pack(State, Board, '1', '2'),
+%     display_game(Board),
+%     % trace,
+%     check_flanking(2-4, State, NewState),
+%     game_state_pack(NewState, NewBoard, '1', '2'),
+%     nl, nl, nl,
+%     display_game(NewBoard).
 
 % -------------------------------------------------------------------------------
 
 :-
     Board = [
-             [' ', ' ', '2', ' ', ' ', ' '],
-             [' ', '1', '2', '2', '1', ' '],
-             [' ', ' ', '2', ' ', ' ', ' '],
-             [' ', ' ', '2', ' ', ' ', ' '],
-             [' ', ' ', '2', ' ', ' ', ' '],
-             [' ', ' ', ' ', ' ', ' ', ' ']
+             [' ', ' ', ' ', ' ', ' ', ' '],
+             ['1', '2', '2', '1', ' ', ' '],
+             ['2', ' ', ' ', ' ', ' ', ' '],
+             ['2', ' ', ' ', ' ', ' ', ' '],
+             ['2', ' ', ' ', ' ', ' ', ' '],
+             ['1', ' ', ' ', ' ', ' ', ' ']
             ], 
     game_state_pack(State, Board, '1', '2'),
     display_game(Board),
     % trace,
-    check_flanking(1-1, State, NewState),
+    check_flanking(1-0, State, NewState),
     game_state_pack(NewState, NewBoard, '1', '2'),
     nl, nl, nl,
     display_game(NewBoard).
-
-% -------------------------------------------------------------------------------
-
-% :-
-%     Board = [
-%              [' ', ' ', ' ', ' ', ' ', ' '],
-%              ['1', '2', '2', '1', ' ', ' '],
-%              ['2', ' ', ' ', ' ', ' ', ' '],
-%              ['2', ' ', ' ', ' ', ' ', ' '],
-%              ['2', ' ', ' ', ' ', ' ', ' '],
-%              ['1', ' ', ' ', ' ', ' ', ' ']
-%             ], 
-%     game_state_pack(State, Board, '1', '2'),
-%     display_game(Board),
-%     % trace,
-%     check_flanking(1-0, State, NewState),
-%     game_state_pack(NewState, NewBoard, '1', '2'),
-%     nl, nl, nl,
-%     display_game(NewBoard).
 
 % -------------------------------------------------------------------------------

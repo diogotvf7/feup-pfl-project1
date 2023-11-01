@@ -14,14 +14,14 @@ switch_current_player(State, NewState):-
 
 mx_delta(Postion, Direction, NewPosition) :-
     member(Direction, [up, down, left, right]),
+    !,
     (Row-Col) = Postion,
     (
         Direction == up -> NewPosition = (Row1-Col), Row1 is Row - 1;
         Direction == down -> NewPosition = (Row1-Col), Row1 is Row + 1;
         Direction == left -> NewPosition = (Row-Col1), Col1 is Col - 1;
         Direction == right -> NewPosition = (Row-Col1), Col1 is Col + 1
-    ),
-    !.
+    ).
 
 mx_get(Position, Matrix, Element) :-
     (Row-Col) = Position,
@@ -30,11 +30,11 @@ mx_get(Position, Matrix, Element) :-
 
 perpendicular(Direction, PerpendicularDirection) :-
     member(Direction, [up, down, left, right]),
+    !,
     (
         Direction == up ; Direction == down -> PerpendicularDirection = horizontal;
         Direction == left ; Direction == right -> PerpendicularDirection = vertical
-    ),
-    !.
+    ).
 
 max(A, B, B) :- B >= A, !.
-max(A, B, B).
+max(A, B, A).
