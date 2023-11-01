@@ -35,6 +35,7 @@ valid_move(Move, State, NewState):-
     Move = Row-Column,
     (Row == 0; Row == Size1; Column == 0; Column == Size1),
     check_flanking(Move, State, S1, 1),
+    State \= S1,
     switch_current_player(S1, NewState).
 
 valid_move(Move, State, NewState):-
