@@ -1,20 +1,10 @@
-% valid_move(State, NewState):-
-%     game_state_pack(State, Board, Player, Opponent),
-%     length(Board, Size),
-%     read_move(Size, Move),
-%     Size1 is Size - 1,
-%     Move \= 0-X,
-%     Move \= Size1-X,
-%     Move \= X-0,
-%     Move \= X-Size1,
-%     mx_get(Move, Board, ' '),
-%     update_board(State, Move, S1),
-%     check_flanking(Move, S1, S2),
-%     switch_current_player(S2, NewState).
-
 valid_move(State, NewState):-
     game_state_pack(State, Board, Player, Opponent),
     length(Board, Size),
+    (Player == '1' ->
+        write('\n\e[91m Player 1 turn\e[0m\n\n');
+        write('\n\e[94m Player 2 turn\e[0m\n\n')
+    ),
     read_move(Size, Move),
     valid_move(Move, State, NewState).
 
@@ -138,6 +128,6 @@ place_disc(I, Element, [H|B], [H|NewB]) :-
     place_disc(I1, Element, B, NewB).
 % ------------------------------------------------------ 
 
-% winning_condition(State, Winner):-
 winning_condition(State):-
     false.
+    
