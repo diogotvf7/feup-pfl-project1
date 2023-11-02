@@ -24,45 +24,16 @@ play:-
     reverse(States, Path), write(Path).
 
 play(Curr, Path, Path):- 
-    final(Curr), !.
+    final(Curr), 
+    % display_game(Curr),
+    !.
 
 play(Curr, Path, States):- 
     game_state_pack(Curr, Board, Player1, Player2),
-    notrace,                        % <--- REMOVE THIS
     display_game(Board),
     move(Curr, Next),
     not( member(Next, Path) ),
     play(Next, [Next|Path], States).
 
-
-
-
-
-    % ___
-    % |    read_move(player, move)
-    % |    check(move)
-    % if true
-    % |    update(move, board, )
-    % else go read_move
-
-
-
-
-
-
-
-% % -----------------------------------------------------
-% % MISC
-
-% cls :- write('\33\[2J').
-
-% % BOARD_LINE
-
-% ask_question( [QUESTION], ANSWER) :-
-%     write(QUESTION), nl,
-%     get_char(ANSWER), skip_line.
-% ask_question( [HEAD | QUESTION], ANSWER) :-
-%     write(HEAD), nl,
-%     ask_question(QUESTION, ANSWER).
-    
+ 
 

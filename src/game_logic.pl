@@ -2,7 +2,6 @@
 valid_move(State, NewState):-
     game_state_pack(State, Board, Player, Opponent),
     length(Board, Size),
-    notrace,                        % <--- REMOVE THIS
     (Player == '1' ->
         write('\n\e[91m Player 1 turn\e[0m\n\n');
         write('\n\e[94m Player 2 turn\e[0m\n\n')
@@ -132,7 +131,6 @@ place_disc(I, Element, [H|B], [H|NewB]) :-
 
 winning_condition(State):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
-    trace,
     % Aqui tive de por a checkar a condição da vitoria para o oponent porque já se mudou o current player antes deste predicado
     % Mesmo assim so reconhece a vitoria passadas algumas rondas
     (check_rows(Opponent, Board);
@@ -155,7 +153,7 @@ check_full_row(CurrentPlayer, [_|B], 0):-
 check_full_row(CurrentPlayer, [H|B], 1):-
     H == CurrentPlayer,
     check_full_row(CurrentPlayer, B, 1).
-check_full_row(_, [], 1):- fail.
+check_full_row(_, [_], 1).
 
 
 % ------------------------------------------------------ CHECK COLUMNS

@@ -16,7 +16,5 @@ create_board(N, I, ELEMENT, BOARD) :-
     create_board(N, I1, ELEMENT, NEW_BOARD),
     append([LINE], NEW_BOARD, BOARD).
 
-% ------------------------------------------------------ GET ELEMENT
-get_element(X, Y, BOARD, ELEMENT) :-
-    nth0(Y, BOARD, LINE),
-    nth0(X, LINE, ELEMENT).
+
+                
