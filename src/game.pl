@@ -28,9 +28,10 @@ play(Curr, Path, Path):-
 
 play(Curr, Path, States):- 
     game_state_pack(Curr, Board, Player1, Player2),
+    notrace,                        % <--- REMOVE THIS
     display_game(Board),
     move(Curr, Next),
-    % not( member(Next, Path) ),
+    not( member(Next, Path) ),
     play(Next, [Next|Path], States).
 
 
