@@ -13,7 +13,7 @@ switch_current_player(State, NewState):-
     game_state_pack(NewState, Board, Opponent, CurrentPlayer).
 
 mx_delta(Postion, Direction, NewPosition) :-
-    member(Direction, [up, down, left, right]),
+    % member(Direction, [up, down, left, right]),
     !,
     (Row-Col) = Postion,
     (
@@ -29,11 +29,10 @@ mx_get(Position, Matrix, Element) :-
     nth0(Col, RowList, Element).
 
 perpendicular(Direction, PerpendicularDirection) :-
-    member(Direction, [up, down, left, right]),
-    !,
     (
-        Direction == up ; Direction == down -> PerpendicularDirection = horizontal;
-        Direction == left ; Direction == right -> PerpendicularDirection = vertical
+        (Direction == up ; Direction == down) -> PerpendicularDirection = left-right
+        ;
+        (Direction == left ; Direction == right) -> PerpendicularDirection = up-down
     ).
 
 
