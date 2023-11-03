@@ -25,6 +25,7 @@ valid_move(Move, State, NewState):-
     Size1 is Size - 1,
     Move = Row-Column,
     (Row == 0; Row == Size1; Column == 0; Column == Size1),
+    write('Trying to place a disc in the perimeter!\n'),
     check_flanking(Move, State, S1, 1),
     State \= S1,
     switch_current_player(S1, NewState).
@@ -35,55 +36,112 @@ valid_move(Move, State, NewState):-
 
 % ------------------------------------------------------------------------------- CHECK FLANKING
 check_flanking(Start, State, NewState, IsPerimeter):-
-    check_segment(Start, up, State, S1, 0, IsPerimeter),
-    check_segment(Start, down, S1, S2, 0, IsPerimeter),
-    check_segment(Start, left, S2, S3, 0, IsPerimeter),
-    check_segment(Start, right, S3, NewState, 0, IsPerimeter).
+    check_segment(Start, up, State, S1, IsPerimeter),
+    check_segment(Start, down, S1, S2, IsPerimeter),
+    check_segment(Start, left, S2, S3, IsPerimeter),
+    check_segment(Start, right, S3, NewState, IsPerimeter).
 
 % ------------------------------------------------------------------------------- CHECK SEGMENT
-check_segment(Position, Direction, State, NewState, 0, 0):-
-    check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength),
-    FlankLength > CutLength.
 
-check_segment(Position, Direction, State, NewState, 0, 1):-
-    check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength),
-    RealFlankLength is FlankLength - 1,
-    RealFlankLength > CutLength.
+/**
+ * Nao sei porque isto esta a dar um bug quando corremos 
+ * o tabuleiro 10x10 a verificar os cuts:
+ * Jogando (1-1), (1-2), (1-3), (1-4), (1-5), (1-6), (1-7), (1-8)
+ * Na ultima jogada o programa trava
+ * 
+ */
 
-check_segment(Position, Direction, State, State, 0, _).
+check_segment(Position, Direction, State, NewState, 0):-
+    check_segment_s1(Position, Direction, State, NewState, FlankLength, cl).
+    % FlankLength > CutLength.
 
-check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength):-
+check_segment(Position, Direction, State, NewState, 1):-
+    check_segment_s1(Position, Direction, State, NewState, FlankLength, cl).
+    % RealFlankLength is FlankLength - 1,
+    % RealFlankLength > CutLength.
+
+check_segment(Position, Direction, State, State, _).
+
+check_segment_s1(Position, Direction, State, NewState, FlankLength, cl):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
     mx_delta(Position, Direction, NewPosition),
-    mx_get(NewPosition, Board, Piece),
-    Piece == Opponent,
-    perpendicular(Direction, Perpendicular),
-    count_cut(NewPosition, Perpendicular, State, Count),
-    check_segment(NewPosition, Direction, State, S1, 1, FL, CL),
-    max(Count, CL, CutLength),
-    update_board(S1, NewPosition, NewState),
-    FlankLength is FL + 1,
-    !.
-
-check_segment(Position, Direction, State, State, 0, 0, 0).
-
-check_segment(Position, Direction, State, NewState, 1, FlankLength, CutLength):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
-    mx_delta(Position, Direction, NewPosition),
-    mx_get(NewPosition, Board, Piece),
-    Piece == Opponent,
-    perpendicular(Direction, Perpendicular),
-    count_cut(NewPosition, Perpendicular, State, Count),
-    check_segment(NewPosition, Direction, State, S1, 1, FL, CL),
-    max(Count, CL, CutLength),
-    update_board(S1, NewPosition, NewState),
+    mx_get(NewPosition, Board, Opponent),
+    % perpendicular(Direction, Perpendicular),
+    % count_cut(NewPosition, Perpendicular, State, Count),
+    check_segment_s2(NewPosition, Direction, State, S1, FL, CL),
+    % max(FL, CL, FlankLength),
+    write('NewPosition: '), write(NewPosition), write('\n'),
+    update_board(S1, NewPosition, NewState).
     FlankLength is FL + 1.
 
-check_segment(Position, Direction, State, State, 1, 2, 0):-
+
+check_segment_s2(Position, Direction, State, NewState, FlankLength, cl):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
     mx_delta(Position, Direction, NewPosition),
-    mx_get(NewPosition, Board, Piece),
-    Piece == CurrentPlayer.
+    mx_get(NewPosition, Board, Opponent),
+    % perpendicular(Direction, Perpendicular),
+    % count_cut(NewPosition, Perpendicular, State, Count),
+    check_segment_s2(NewPosition, Direction, State, S1, FL, CL),
+    % max(FL, CL, FlankLength),
+    update_board(S1, NewPosition, NewState).
+    FlankLength is FL + 1.
+
+
+check_segment_s2(Position, Direction, State, State, 2, 0):-
+    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    mx_delta(Position, Direction, NewPosition),
+    mx_get(NewPosition, Board, CurrentPlayer).
+
+% check_segment_s2(Position, Direction, State, State, 0, 0).
+% check_segment_s1(Position, Direction, State, State, 0, 0).
+
+
+
+% check_segment(Position, Direction, State, State, 0, _).
+
+% check_segment(Position, Direction, State, NewState, 0, FlankLength, CutLength):-
+%     write('A: check_segment('), write(Position), write(', '), write(Direction), write(', '), write(State), write(', '), write(NewState), write(', '), write(0), write(', '), write(FlankLength), write(', '), write(CutLength), write(')\n'),
+%     game_state_pack(State, Board, CurrentPlayer, Opponent),
+%     mx_delta(Position, Direction, NewPosition),
+%     mx_get(NewPosition, Board, Piece),
+%     Piece == Opponent,
+%     perpendicular(Direction, Perpendicular),
+%     count_cut(NewPosition, Perpendicular, State, Count),
+%     check_segment(NewPosition, Direction, State, S1, 1, FL, CL),
+%     max(Count, CL, CutLength),
+%     update_board(S1, NewPosition, NewState),
+%     FlankLength is FL + 1.
+
+% check_segment(Position, Direction, State, State, 0, 0, 0):-
+%     write('B: check_segment('), write(Position), write(', '), write(Direction), write(', '), write(State), write(', '), write(State), write(', '), write(0), write(', '), write(0), write(', '), write(0), write(')\n').
+
+% check_segment(Position, Direction, State, State, 1, 0, 0):-
+%     write('E: check_segment('), write(Position), write(', '), write(Direction), write(', '), write(State), write(', '), write(State), write(', '), write(1), write(', '), write(FL), write(', '), write(BL), write(')\n').
+%     game_state_pack(State, Board, CurrentPlayer, Opponent),
+%     mx_delta(Position, Direction, NewPosition),
+%     mx_get(NewPosition, Board, ' ').
+
+% check_segment(Position, Direction, State, State, 1, 2, 0):-
+%     write('D: check_segment('), write(Position), write(', '), write(Direction), write(', '), write(State), write(', '), write(State), write(', '), write(1), write(', '), write(2), write(', '), write(0), write(')\n'),
+%     game_state_pack(State, Board, CurrentPlayer, Opponent),
+%     mx_delta(Position, Direction, NewPosition),
+%     mx_get(NewPosition, Board, Piece),
+%     Piece == CurrentPlayer,
+%     !.
+    
+% check_segment(Position, Direction, State, NewState, 1, FlankLength, CutLength):-
+%     write('C: check_segment('), write(Position), write(', '), write(Direction), write(', '), write(State), write(', '), write(NewState), write(', '), write(1), write(', '), write(FlankLength), write(', '), write(CutLength), write(')\n'),
+%     game_state_pack(State, Board, CurrentPlayer, Opponent),
+%     mx_delta(Position, Direction, NewPosition),
+%     mx_get(NewPosition, Board, Piece),
+%     Piece == Opponent,
+%     perpendicular(Direction, Perpendicular),
+%     count_cut(NewPosition, Perpendicular, State, Count),
+%     check_segment(NewPosition, Direction, State, S1, 1, FL, CL),
+%     max(Count, CL, CutLength),
+%     update_board(S1, NewPosition, NewState),
+%     FlankLength is FL + 1,
+%     !.
     
 % ------------------------------------------------------------------------------- COUNT CUT
 count_cut(Position, vertical, State, Count):-

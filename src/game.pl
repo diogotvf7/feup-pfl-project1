@@ -24,8 +24,9 @@ play:-
     reverse(States, Path), write(Path).
 
 play(Curr, Path, Path):- 
+    game_state_pack(Curr, Board, Player1, Player2),
     final(Curr), 
-    % display_game(Curr),
+    display_game(Board),
     !.
 
 play(Curr, Path, States):- 
