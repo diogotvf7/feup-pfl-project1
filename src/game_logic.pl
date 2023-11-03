@@ -3,8 +3,8 @@ valid_move(State, NewState):-
     game_state_pack(State, Board, Player, Opponent),
     length(Board, Size),
     (Player == '1' ->
-        write('\n\e[91m Player 1 turn\e[0m\n\n');
-        write('\n\e[94m Player 2 turn\e[0m\n\n')
+        write('\n\e[93m Player 1 turn\e[0m\n\n');
+        write('\n\e[95m Player 2 turn\e[0m\n\n')
     ),
     read_move(Size, Move),
     valid_move(Move, State, NewState).
@@ -25,7 +25,6 @@ valid_move(Move, State, NewState):-
     Size1 is Size - 1,
     Move = Row-Column,
     (Row == 0; Row == Size1; Column == 0; Column == Size1),
-    write('Trying to place a disc in the perimeter!\n'),
     check_flanking(Move, State, S1, 1),
     State \= S1,
     switch_current_player(S1, NewState).
@@ -53,36 +52,24 @@ check_flanking(Start, State, NewState, IsPerimeter):-
 
 check_segment(Position, Direction, State, NewState, 0):-
     check_segment_s1(Position, Direction, State, NewState, FlankLength, CutLength),
-    write('FlankLength: '), write(FlankLength), write('\n'),                                    % DEBUG
-    write('CutLength: '), write(CutLength), write('\n'),                                        % DEBUG
-    write('FlankLength > CutLength: '), write(FlankLength > CutLength), write('\n'),            % DEBUG
     FlankLength > CutLength.
 
 check_segment(Position, Direction, State, NewState, 1):-
     % trace,
     check_segment_s1(Position, Direction, State, NewState, FlankLength, CutLength),
     RealFlankLength is FlankLength - 1,
-    write('RealFlankLength: '), write(RealFlankLength), write('\n'),                            % DEBUG
-    write('CutLength: '), write(CutLength), write('\n'),                                        % DEBUG
-    write('RealFlankLength > CutLength: '), write(RealFlankLength > CutLength), write('\n'),    % DEBUG
     RealFlankLength > CutLength.
 
-check_segment(Position, Direction, State, State, _):-
-    write('Wtf am I doing here?\n').
+check_segment(Position, Direction, State, State, _).
 
 check_segment_s1(Position, Direction, State, NewState, FlankLength, CutLength):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
-    % write('Perpendicular: '), write(Perpendicular), write('\n'),    % DEBUG
     count_cut_s0(NewPosition, Perpendicular, State, Count),
-    write(Position), write(' -> cut size: '), write(Count), write('\n'),    % DEBUG
     check_segment_s2(NewPosition, Direction, State, S1, FL, CL),
-    write('Max('), write(Count), write(', '), write(CL), write(') = '),     % DEBUG
     max(Count, CL, CutLength),
-    write(CutLength), write('\n'),                                        % DEBUG
-    write('NewPosition: '), write(NewPosition), write('\n'),                % DEBUG
     update_board(S1, NewPosition, NewState),
     FlankLength is FL + 1.
 
@@ -92,14 +79,9 @@ check_segment_s2(Position, Direction, State, NewState, FlankLength, CutLength):-
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
-    % write('Perpendicular: '), write(Perpendicular), write('\n'),    % DEBUG
     count_cut_s0(NewPosition, Perpendicular, State, Count),
-    write(Position), write(' -> cut size: '), write(Count), write('\n'),    % DEBUG
     check_segment_s2(NewPosition, Direction, State, S1, FL, CL),
-    write('Max('), write(Count), write(', '), write(CL), write(') = '),     % DEBUG
     max(Count, CL, CutLength),
-    write(CutLength), write('\n'),                                        % DEBUG
-    write('NewPosition: '), write(NewPosition), write('\n'),                % DEBUG
     update_board(S1, NewPosition, NewState),
     FlankLength is FL + 1.
 
@@ -162,12 +144,8 @@ check_segment_s2(Position, Direction, State, State, 2, 0):-
     
 % ------------------------------------------------------------------------------- COUNT CUT
 count_cut_s0(Position, Direction1-Direction2, State, Cut):-
-    write('Checking cut for '), write(Position), write('\n'),    % DEBUG
-    write('Directions: '), write(Direction1), write(' '), write(Direction2), write('\n'),    % DEBUG
     count_cut_s1(Position, Direction1, State, Cut1),
-    write('Cut1: '), write(Cut1), write('\n'),          % DEBUG
     count_cut_s1(Position, Direction2, State, Cut2),
-    write('Cut2: '), write(Cut2), write('\n'),          % DEBUG
     Cut is Cut1 + Cut2 + 1.
 
 % count_cut(Position, vertical, State, Count):-
