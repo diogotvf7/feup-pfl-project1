@@ -5,10 +5,13 @@
 :- ['src/io.pl'].
 :- ['src/game_logic.pl'].
 :- ['src/util.pl'].
+:- ['src/menu.pl'].
  
 run:-
-    play.
+    main_menu(Input).
+    % play.
 
 :- 
     cls,
-    run.
+    main_menu(Input).
+    % run.

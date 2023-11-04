@@ -1,7 +1,3 @@
-:- ['util.pl'].
-:- ['board.pl'].
-:- ['game_logic.pl'].
-
 % ----------------------------------------------------- INITIAL
 initial(Size, InitialState):-
     create_board(Size, ' ', Board),
@@ -9,7 +5,7 @@ initial(Size, InitialState):-
 
 % ----------------------------------------------------- FINAL
 final(State):- 
-    winning_condition(State).
+    game_over(State, Winner).
 
 % ----------------------------------------------------- MOVE
 move(State, NewState):-
@@ -25,14 +21,17 @@ play:-
 
 play(Curr, Path, Path):- 
     game_state_pack(Curr, Board, Player1, Player2),
+    % trace,      % TODO: remove
     final(Curr), 
     display_game(Board),
     !.
 
 play(Curr, Path, States):- 
+    % notrace,      % TODO: remove
     game_state_pack(Curr, Board, Player1, Player2),
     display_game(Board),
-    move(Curr, Next),
+    move(Curr, S1),
+    switch_current_player(S1, Next),
     not( member(Next, Path) ),
     play(Next, [Next|Path], States).
 

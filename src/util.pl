@@ -41,3 +41,24 @@ max(A, B, A).
 
 not(X):- X, !, fail.
 not(_X).
+
+strlen(String, Length):-
+    atom_chars(String, Chars),
+    length(Chars, Length).
+
+center_text(Text, Space):-
+    strlen(Text, L),
+    Half is (Space-L)/2,
+    PaddingL is floor(Half),
+    PaddingR is ceiling(Half),
+    write_n_times(' ', PaddingL),
+    write(Text),
+    write_n_times(' ', PaddingR).
+
+array_cmp(Array1, Array2, Largest):-
+    length(Array1, Length1),
+    length(Array2, Length2),
+    (
+        Length1 >= Length2 -> Largest = Array1;
+        Length2 > Length1 -> Largest = Array2
+    ).
