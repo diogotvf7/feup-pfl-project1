@@ -43,19 +43,11 @@ check_flanking(Start, State, NewState, IsPerimeter):-
 
 get_flank(Position, Direction, State, NewState, 0):-
     get_flank_s0(Position, Direction, State, NewState, Flank, Cut),
-    write('Flank: '), write(Flank), write('\n'),
-    write('Cut: '), write(Cut), write('\n'),
-    length(Flank, FlankLength),
-    length(Cut, CutLength),
-    FlankLength > CutLength.
+    array_cmp(Flank, Cut, Flank).
 
 get_flank(Position, Direction, State, NewState, 1):-
     get_flank_s1(Position, Direction, State, NewState, Flank, Cut),
-    write('Flank: '), write(Flank), write('\n'),
-    write('Cut: '), write(Cut), write('\n'),
-    length(Flank, FlankLength),
-    length(Cut, CutLength),
-    FlankLength > CutLength.
+    array_cmp(Flank, Cut, Flank).
 
 get_flank(Position, Direction, State, State, _).
 
@@ -67,10 +59,7 @@ get_flank_s1(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
-    % trace,    % TODO: remove
     get_cut_s0(NewPosition, Perpendicular, State, CurrentCut),
-    notrace,    % TODO: remove
-    write('CurrentCut: '), write(CurrentCut), write('\n'),
     get_flank_s2(NewPosition, Direction, State, S1, Flank, CarriedCut),
     array_cmp(CurrentCut, CarriedCut, Cut),
     update_board(S1, NewPosition, NewState).
@@ -80,33 +69,22 @@ get_flank_s2(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
-    % trace,    % TODO: remove
     get_cut_s0(NewPosition, Perpendicular, State, CurrentCut),
-    notrace,    % TODO: remove
-    write('CurrentCut: '), write(CurrentCut), write('\n'),
     get_flank_s2(NewPosition, Direction, State, S1, Flank, CarriedCut),
     array_cmp(CurrentCut, CarriedCut, Cut),
     update_board(S1, NewPosition, NewState).
 
-get_flank_s2(Position, Direction, State, State, [NewPosition], Cut):-
+get_flank_s2(Position, Direction, State, State, [NewPosition], []):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, CurrentPlayer).
     
 % ------------------------------------------------------------------------------- COUNT CUT
 get_cut_s0(Position, Direction1-Direction2, State, Cut):-
-    % notrace,
     get_cut_s1(Position, Direction1, State, Cut1),
     get_cut_s1(Position, Direction2, State, Cut2),
     reverse(Cut1, Cut1R),
-    append([Cut1R, [Position], Cut2], Cut),
-    write('Cut1R: '), write(Cut1R), write('\n'),
-    write('[Position]: '), write([Position]), write('\n'),
-    write('[Position]: '), write([Position]), write('\n'),
-    write('Cut2: '), write(Cut2), write('\n'),
-    write('Cut after append: '), write(Cut), write('\n'),
-    trace
-    .
+    append([Cut1R, [Position], Cut2], Cut).
 
 get_cut_s1(Position, Direction, State, [NewPosition|Cut]):-
     game_state_pack(State, Board, CurrentPlayer, Opponent),

@@ -59,6 +59,6 @@ array_cmp(Array1, Array2, Largest):-
     length(Array1, Length1),
     length(Array2, Length2),
     (
-        Length1 >= Length2 -> Largest = Array1;
-        Length2 > Length1 -> Largest = Array2
+        Length1 > Length2 -> Largest = Array1;
+        Length2 >= Length1 -> Largest = Array2
     ).
