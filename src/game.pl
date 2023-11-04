@@ -1,7 +1,7 @@
 % ----------------------------------------------------- INITIAL
-initial(Size, InitialState):-
-    create_board(Size, ' ', Board),
-    game_state_pack(InitialState, Board, '1', '2').
+initial_state(Player1-Player2-Difficulty-Size, InitialState):-
+    create_board(Size, Board),
+    game_state_pack(InitialState, Board, Player1, Player2, Difficulty).
 
 % ----------------------------------------------------- FINAL
 final(State):- 
@@ -13,22 +13,26 @@ move(State, NewState):-
 
 % ----------------------------------------------------- PLAY
 play:- 
+    % main_menu(Input),
+    % (
+    %     Input == 1 -> play_menu(Config);
+    % ),
     write('Size of board: '), nl,
     get_int(Size, 5, 10), 
-    initial(Size, Init),
+    % trace,
+    initial_state(p1-p2-easy-Size, Init),
     play(Init, [Init], States),
-    reverse(States, Path), write(Path).
+    reverse(States, Path), write(Path),
+    play.
 
 play(Curr, Path, Path):- 
-    game_state_pack(Curr, Board, Player1, Player2),
-    % trace,      % TODO: remove
+    game_state_pack(Curr, Board, CurrentPlayer, Opponent, Difficulty),
     final(Curr), 
     display_game(Board),
     !.
 
 play(Curr, Path, States):- 
-    % notrace,      % TODO: remove
-    game_state_pack(Curr, Board, Player1, Player2),
+    game_state_pack(Curr, Board, CurrentPlayer, Opponent, Difficulty),
     display_game(Board),
     move(Curr, S1),
     switch_current_player(S1, Next),

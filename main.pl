@@ -7,11 +7,6 @@
 :- ['src/util.pl'].
 :- ['src/menu.pl'].
  
-run:-
-    main_menu(Input).
-    % play.
-
 :- 
     cls,
-    main_menu(Input).
-    % run.
+    play.

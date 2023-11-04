@@ -5,15 +5,14 @@
  * This packs the GameState:
  *     game_state_pack(-GameState, +Board, +CurrentPlayer, +Opponent)
  */
-game_state_pack(GameState, Board, CurrentPlayer, Opponent) :-
-    GameState = [Board, CurrentPlayer, Opponent].
+game_state_pack(GameState, Board, CurrentPlayer, Opponent, Difficulty) :-
+    GameState = [Board, CurrentPlayer, Opponent, Difficulty].
 
 switch_current_player(State, NewState):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
-    game_state_pack(NewState, Board, Opponent, CurrentPlayer).
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
+    game_state_pack(NewState, Board, Opponent, CurrentPlayer, Difficulty).
 
 mx_delta(Postion, Direction, NewPosition) :-
-    % member(Direction, [up, down, left, right]),
     !,
     (Row-Col) = Postion,
     (

@@ -1,8 +1,8 @@
 % ------------------------------------------------------------------------------- VALID MOVE
 valid_move(State, NewState):-
-    game_state_pack(State, Board, Player, Opponent),
+    game_state_pack(State, Board, Player, Opponent, Difficulty),
     length(Board, Size),
-    (Player == '1' ->
+    (Player == p1 ->
         write('\n\e[93m Player 1 turn\e[0m\n\n');
         write('\n\e[95m Player 2 turn\e[0m\n\n')
     ),
@@ -10,16 +10,16 @@ valid_move(State, NewState):-
     valid_move(Move, State, NewState).
 
 valid_move(Move, State, NewState):-
-    game_state_pack(State, Board, Player, Opponent),
+    game_state_pack(State, Board, Player, Opponent, Difficulty),
     length(Board, Size),
     Size1 is Size - 1,
     Move \= 0-X, Move \= Size1-X, Move \= X-0, Move \= X-Size1,
-    mx_get(Move, Board, ' '),
+    mx_get(Move, Board, x),
     update_board(State, Move, S1),
     check_flanking(Move, S1, NewState, 0).
 
 valid_move(Move, State, NewState):-
-    game_state_pack(State, Board, Player, Opponent),
+    game_state_pack(State, Board, Player, Opponent, Difficulty),
     length(Board, Size),
     Size1 is Size - 1,
     Move = Row-Column,
@@ -47,6 +47,8 @@ get_flank(Position, Direction, State, NewState, 0):-
 
 get_flank(Position, Direction, State, NewState, 1):-
     get_flank_s1(Position, Direction, State, NewState, Flank, Cut),
+    write('Flank: '), write(Flank), nl,
+    write('Cut: '), write(Cut), nl,
     array_cmp(Flank, Cut, Flank).
 
 get_flank(Position, Direction, State, State, _).
@@ -55,7 +57,7 @@ get_flank_s0(Position, Direction, State, NewState, [Position|Flank], Cut):-
     get_flank_s1(Position, Direction, State, NewState, Flank, Cut).
 
 get_flank_s1(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
@@ -65,7 +67,7 @@ get_flank_s1(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
     update_board(S1, NewPosition, NewState).
 
 get_flank_s2(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
@@ -75,7 +77,7 @@ get_flank_s2(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
     update_board(S1, NewPosition, NewState).
 
 get_flank_s2(Position, Direction, State, State, [NewPosition], []):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, CurrentPlayer).
     
@@ -87,7 +89,7 @@ get_cut_s0(Position, Direction1-Direction2, State, Cut):-
     append([Cut1R, [Position], Cut2], Cut).
 
 get_cut_s1(Position, Direction, State, [NewPosition|Cut]):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     get_cut_s1(NewPosition, Direction, State, Cut),
@@ -98,9 +100,9 @@ get_cut_s1(Position, Direction, State, []):- !.
 % ------------------------------------------------------ UPDATE BOARD 
 update_board(State, Move, NewState):-
     Move = (Row-Column),
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
     place_disc(Row, Column, CurrentPlayer, Board, NewBoard),
-    game_state_pack(NewState, NewBoard, CurrentPlayer, Opponent).
+    game_state_pack(NewState, NewBoard, CurrentPlayer, Opponent, Difficulty).
 
 place_disc(0, Column, Element, [H|B], [NewH|B]):-
     place_disc(Column, Element, H, NewH),
@@ -117,11 +119,10 @@ place_disc(I, Element, [H|B], [H|NewB]) :-
 % ------------------------------------------------------ WINNING CONDITION
 
 game_over(State, Winner):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent),
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
     (check_rows(Opponent, Board) ; check_columns(Opponent, Board)),
     Winner = Opponent.
     
-
 % ------------------------------------------------------ CHECK ROWS
 
 check_rows(CurrentPlayer, [H]):-
