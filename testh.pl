@@ -117,3 +117,16 @@ count_pieces_s1([],_,0).
     % write('\e[97m white \e[0m').
     
 % -------------------------------------------------------------------------------
+
+
+
+
+GameState(['  ', '          ', '  ', '          ', '          ', '  '],
+          ['  ', ' Player 1 ', '  ', '          ', '          ', '  '],
+          ['  ', ' Player 1 ', '  ', ' Player 1 ', ' Player 1 ', '  '],
+          ['  ', ' Player 1 ', '  ', '          ', '          ', '  '],
+          ['  ', ' Player 2 ', '  ', '          ', '          ', '  '],
+          ['  ', '          ', '  ', '          ', '          ', '  '], %BOARD
+          Player 1,                                                     %CURRENTPLAYER
+          Player 2,                                                     %OPPONENT
+          none)                                                         %DIFFICULTY

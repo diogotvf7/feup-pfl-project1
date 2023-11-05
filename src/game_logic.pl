@@ -92,36 +92,40 @@ count_pieces_s1([],_,0).
 
 % ------------------------------------------------------------------------------- MINMAX
 
-% minmax(State, BestMove, Depth):-
-%     valid_moves(State, ListOfMoves), !,             % Legal moves in Pos produce ListOfMoves
-%     best_move(ListOfMoves, State, BestMove, Depth);
-%     staticval(State, Value).                        % Pos has no successors
+best_move(State, BestMove, Depth):-
+    game_state_pack(State, Board, Max, _, _),
+    switch_current_player(State, StartState),
+    depth_value(Max, StartState, BestMove, _, Depth).
 
-% best_move([Move], State, Move, Depth):-
-%     minimax(State, _, Value, Depth), !.
+depth_value(_, State, _, Val, 0):-
+    value(State, Val), !.
 
-% best_move([Move|B], State, BestMove, Depth):-
-%     valid_move(Move, State, NewState),
-%     minimax(State, )
+depth_value(Max, State, BestMove, Val, Depth):-
+    Depth1 is Depth - 1,
+    switch_current_player(State, NewState),  
+    valid_moves(NewState, ListOfMoves), !,    
+    best_move(Max, NewState, ListOfMoves, BestMove, Val, Depth1);
+    value(State, Val).
 
-% minimax(State, BestSucc, Value):-
-%     valid_moves(State, ListOfMoves), !,             % Legal moves in Pos produce ListOfMoves
-%     best(ListOfMoves, BestSucc, Value);
-%     staticval(State, Value).                        % Pos has no successors
+best_move(Max, State, [Move], Move, Val, Depth):-
+    valid_move(Move, State, NewState),
+    depth_value(Max, NewState, _, Val, Depth),
+    !.
 
-% best([State], State, Value):-
-%     minimax(State, _, Value), !.
+best_move(Max, State, [Move1|B], BestMove, BestVal, Depth):-
+    valid_move(Move1, State, NewState),
+    depth_value(Max, NewState, _, Val1, Depth1),
+    best_move(Max, State, B, Move2, Val2, Depth),
+    compare_state(Max, NewState, Move1, Val1, Move2, Val2, BestMove, BestVal).
 
-% best([State|B], BestState, BestVal)
-%     minimax(State, _, Val1),
-%     best(B, State2, Val2),
-%     betterof(State, Val1, State2, Val2, BestState, BestVal).
+compare_state(Max, State, Move1, Val1, Move2, Val2, Move1, Val1):-
+    game_state_pack(State, _, CurrentPlayer, _, _),
+    (
+        CurrentPlayer \== Max, Val1 < Val2, !;
+        CurrentPlayer == Max, Val1 > Val2, !
+    ).
 
-% betterof(State0, Val0, State1, Val1, State0, Val0):-
-%     game_state_pack(State0, _, CurrentPlayer, _, _),
-%     min_to_move(State0), Val0 > Val1, !;
-%     max_to_move(State0), Val0 < Val1, !.
-% betterof(StateO, Val0, State1, Vall, State1, Val1).
+compare_state(Max, _, _, _, Move2, Val2, Move2, Val2).
 
 % ------------------------------------------------------------------------------- CHOOSE MOVE
 
@@ -143,21 +147,19 @@ choose_move(State, Player, Move):-
     % valid_moves(State, ListOfMoves),      % | Nao podemos ter 
     % random_member(Move, ListOfMoves).     % | so isto??????
 
-% choose_move(State, Player, Move):-
-%     game_state_pack(State, _, Player, _, 2),
-%     length(State, Size),
-%     (
-%         Player == 'Computer 1' ->
-%         (
-%             valid_moves(State, ListOfMoves),
-
-%         );
-%         Player == 'Computer 2' ->
-%         (
-%             valid_moves(State, ListOfMoves),
-
-%         )
-%     ).
+choose_move(State, Player, BestMove):-
+    game_state_pack(State, _, Player, _, 2),
+    length(State, Size),
+    (
+        Player == 'Computer 1' ->
+        (
+            best_move(State, BestMove, 5)
+        );
+        Player == 'Computer 2' ->
+        (
+            best_move(State, BestMove, 5)
+        )
+    ).
 
 % ------------------------------------------------------------------------------- VALID MOVE
 
@@ -184,14 +186,16 @@ valid_move(State, NewState):-
             write('\n\e[93m Computer 1 turn\e[0m\n\n'),
             choose_move(State, Player, Move),
             valid_move(Move, State, NewState),
-            sleep(1)
+            get_int(_, 0, 0)
+            % sleep(1)
         );
         (Player == 'Computer 2') ->
         (   
             write('\n\e[95m Computer 2 turn\e[0m\n\n'),
             choose_move(State, Player, Move),
             valid_move(Move, State, NewState),
-            sleep(1)
+            get_int(_, 0, 0)
+            % sleep(1)
         )
     ).
 
