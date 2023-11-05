@@ -1,25 +1,5 @@
 % ------------------------------------------------------------------------------- VALID MOVES
 
-% valid_moves(State, ListOfMoves):-
-%     game_state_pack(State, Board, Player, Opponent, Difficulty),
-%     length(Board, Size1),
-%     Size is Size1 - 1,
-%     findall(Move, 
-%         (
-%             for(X,0,L),
-%             do ( 
-%                 for(Y,0,L),
-%                 param(X)
-%                 do ( 
-%                     Move = X-Y,
-%                     valid_move(Move, State, NewState),
-%                 )
-%             )
-%         ),
-%     ListOfMoves).
-
-% ------------------------------------------------------------------------------- VALID MOVES
-
 valid_moves(State, ListOfMoves):-
     game_state_pack(State, Board, _, _, _),
     length(Board, Size),
@@ -47,14 +27,40 @@ valid_moves(State, ListOfMoves, Row, Column, Size):-
 valid_move(State, NewState):-
     game_state_pack(State, Board, Player, _, _),
     length(Board, Size),
-    (Player == p1 ->
-        write('\n\e[93m Player 1 turn\e[0m\n\n');
-        write('\n\e[95m Player 2 turn\e[0m\n\n')
-    ),
-    read_move(Size, Move),
-    valid_move(Move, State, NewState)
-    ; 
-    write('Invalid move!\n'), valid_move(State, NewState).
+    (
+        Player == 'Player 1' ->
+        (
+            write('\n\e[93m Player 1 turn\e[0m\n\n'),
+            read_move(Size, Move),
+            valid_move(Move, State, NewState); 
+            write('Invalid move!\n'), valid_move(State, NewState)
+        );
+        Player == 'Player 2' ->
+        (
+            write('\n\e[95m Player 2 turn\e[0m\n\n'),
+            read_move(Size, Move),
+            valid_move(Move, State, NewState); 
+            write('Invalid move!\n'), valid_move(State, NewState)
+        );
+        (Player == 'Computer 1'; Player == 'Computer 2') ->
+        (   
+            valid_moves(State, ListOfMoves),
+            random_member(Move, ListOfMoves),
+            valid_move(Move, State, NewState)
+        )
+    ).
+
+% valid_move(State, NewState):-
+%     game_state_pack(State, Board, Player, _, _),
+%     length(Board, Size),
+%     (Player == p1 ->
+%         write('\n\e[93m Player 1 turn\e[0m\n\n');
+%         write('\n\e[95m Player 2 turn\e[0m\n\n')
+%     ),
+%     read_move(Size, Move),
+%     valid_move(Move, State, NewState)
+%     ; 
+%     write('Invalid move!\n'), valid_move(State, NewState).
 
 valid_move(Move, State, NewState):-
     game_state_pack(State, Board, _, _, _),

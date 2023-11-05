@@ -5,7 +5,9 @@ initial_state([Player1, Player2, Size, Difficulty], InitialState):-
 
 % ----------------------------------------------------- FINAL
 final(State):- 
-    game_over(State, Winner).
+    game_over(State, Winner),
+    game_state_pack(State, Board, CurrentPlayer, _, _),
+    winner_menu(Board, Winner).
 
 % ----------------------------------------------------- MOVE
 move(State, NewState):-
@@ -33,9 +35,7 @@ play:-
     ).
 
 play(Curr, Path, Path):- 
-    game_state_pack(Curr, Board, CurrentPlayer, Opponent, Difficulty),
     final(Curr), 
-    display_game(Board),
     !.
 
 play(Curr, Path, States):- 
@@ -43,6 +43,7 @@ play(Curr, Path, States):-
     display_game(Board),
     move(Curr, S1),
     switch_current_player(S1, Next),
+    cls,
     not( member(Next, Path) ),
     play(Next, [Next|Path], States).
 
