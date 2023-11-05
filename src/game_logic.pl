@@ -1,5 +1,9 @@
 % ------------------------------------------------------------------------------- VALID MOVES
 
+valid_moves(State, _):-
+    game_over(State, _), !,
+    fail.
+
 valid_moves(State, ListOfMoves):-
     game_state_pack(State, Board, _, _, _),
     length(Board, Size),
@@ -25,22 +29,105 @@ valid_moves(State, ListOfMoves, Row, Column, Size):-
 % ------------------------------------------------------------------------------- VALUE
 
 value(State, Value):-
-    % TODO: Implement
-    % 
-    % Parametros:
-    % 1. Checkar o maior segmento do bot            (Positivo)
-    % 2. Checkar o mairo segmento do adversário     (Negativo)
-    % 3. Checkar o número de peças do bot           (Positivo)
-    % 4. Checkar o número de peças do adversário    (Negativo)
-    % 
-    % 
-    !.
+    game_state_pack(State, Board, CurrentPlayer, Opponent, _),
+    get_largest_segment(Board, CurrentPlayer, PlayerMaxSeg),
+    get_largest_segment(Board, Opponent, OpponentMaxSeg),
+    count_pieces(Board, CurrentPlayer, PlayerPieces),
+    count_pieces(Board, Opponent, OpponentPieces),
+    Value is PlayerMaxSeg - OpponentMaxSeg + PlayerPieces - OpponentPieces.
+
+% ------------------------------------------------------------------------------- GET LARGEST SEGMENT
+
+get_largest_segment(Board, Player, Max):-
+    get_largest_segment_s0(Board, Player, 0-0, Max).
+
+get_largest_segment_s0(Board, Player, Row-Col, Max):-
+    mx_valid_position(Board, Row-Col),
+    get_largest_segment_s1(Board, Player, Row-Col, Max1),
+    length(Board, N),
+    NewCol is (Col + 1) mod N,
+    (NewCol == 0 -> NewRow is Row + 1; NewRow is Row),
+    get_largest_segment_s0(Board, Player, NewRow-NewCol, Max2),
+    max(Max1, Max2, Max).
+
+get_largest_segment_s0(_, _, _, 0).
+
+get_largest_segment_s1(Board, Player, Position, Max):-
+    mx_get(Position, Board, Player),
+    get_largest_segment_s2(Board, Player, Position, up, SizeUp),
+    get_largest_segment_s2(Board, Player, Position, down, SizeDown),
+    get_largest_segment_s2(Board, Player, Position, left, SizeLeft),
+    get_largest_segment_s2(Board, Player, Position, right, SizeRight),
+    lmax([SizeUp, SizeDown, SizeLeft, SizeRight], Max).
+
+get_largest_segment_s1(_, _, _, 0).
+
+get_largest_segment_s2(Board, Player, Position, Direction, Size):-
+    mx_delta(Position, Direction, NewPosition),
+    mx_valid_position(Board, NewPosition),
+    mx_get(NewPosition, Board, Player),
+    get_largest_segment_s2(Board, Player, NewPosition, Direction, Curr),
+    Size is Curr + 1.
+
+get_largest_segment_s2(_, _, _, _, 1).
+
+% ------------------------------------------------------------------------------- COUNT PIECES
+
+count_pieces(Board, Player, Count):-
+    count_pieces_s0(Board, Player, Count).
+
+count_pieces_s0([H|B], Player, Count):-
+    count_pieces_s1(H, Player, RowCount),
+    count_pieces_s0(B, Player, BoardCount),
+    Count is RowCount + BoardCount.
+
+count_pieces_s0([],_,0).
+
+count_pieces_s1([H|T], Player, Count):-
+    (H = Player -> Count1 = 1; Count1 = 0),
+    count_pieces_s1(T, Player, Count2),
+    Count is Count1 + Count2.
+
+count_pieces_s1([],_,0).
+
+% ------------------------------------------------------------------------------- MINMAX
+
+% minmax(State, BestMove, Depth):-
+%     valid_moves(State, ListOfMoves), !,             % Legal moves in Pos produce ListOfMoves
+%     best_move(ListOfMoves, State, BestMove, Depth);
+%     staticval(State, Value).                        % Pos has no successors
+
+% best_move([Move], State, Move, Depth):-
+%     minimax(State, _, Value, Depth), !.
+
+% best_move([Move|B], State, BestMove, Depth):-
+%     valid_move(Move, State, NewState),
+%     minimax(State, )
+
+% minimax(State, BestSucc, Value):-
+%     valid_moves(State, ListOfMoves), !,             % Legal moves in Pos produce ListOfMoves
+%     best(ListOfMoves, BestSucc, Value);
+%     staticval(State, Value).                        % Pos has no successors
+
+% best([State], State, Value):-
+%     minimax(State, _, Value), !.
+
+% best([State|B], BestState, BestVal)
+%     minimax(State, _, Val1),
+%     best(B, State2, Val2),
+%     betterof(State, Val1, State2, Val2, BestState, BestVal).
+
+% betterof(State0, Val0, State1, Val1, State0, Val0):-
+%     game_state_pack(State0, _, CurrentPlayer, _, _),
+%     min_to_move(State0), Val0 > Val1, !;
+%     max_to_move(State0), Val0 < Val1, !.
+% betterof(StateO, Val0, State1, Vall, State1, Val1).
 
 % ------------------------------------------------------------------------------- CHOOSE MOVE
 
 choose_move(State, Player, Move):-
     game_state_pack(State, _, Player, _, 1),
-    length(State, Size),
+    % length(State, Size), % ?????????????????????????????????
     (
         Player == 'Computer 1' ->
         (
@@ -53,6 +140,8 @@ choose_move(State, Player, Move):-
             random_member(Move, ListOfMoves)
         )
     ).
+    % valid_moves(State, ListOfMoves),      % | Nao podemos ter 
+    % random_member(Move, ListOfMoves).     % | so isto??????
 
 % choose_move(State, Player, Move):-
 %     game_state_pack(State, _, Player, _, 2),

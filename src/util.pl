@@ -5,14 +5,14 @@
  * This packs the GameState:
  *     game_state_pack(-GameState, +Board, +CurrentPlayer, +Opponent)
  */
-game_state_pack(GameState, Board, CurrentPlayer, Opponent, Difficulty) :-
+game_state_pack(GameState, Board, CurrentPlayer, Opponent, Difficulty):-
     GameState = [Board, CurrentPlayer, Opponent, Difficulty].
 
 switch_current_player(State, NewState):-
     game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
     game_state_pack(NewState, Board, Opponent, CurrentPlayer, Difficulty).
 
-mx_delta(Postion, Direction, NewPosition) :-
+mx_delta(Postion, Direction, NewPosition):-
     !,
     (Row-Col) = Postion,
     (
@@ -22,12 +22,19 @@ mx_delta(Postion, Direction, NewPosition) :-
         Direction == right -> NewPosition = (Row-Col1), Col1 is Col + 1
     ).
 
-mx_get(Position, Matrix, Element) :-
+mx_get(Position, Matrix, Element):-
     (Row-Col) = Position,
     nth0(Row, Matrix, RowList),
     nth0(Col, RowList, Element).
 
-perpendicular(Direction, PerpendicularDirection) :-
+mx_valid_position(Matrix, Position):-
+    (Row-Col) = Position,
+    length(Matrix, Rows),
+    length(Matrix, Cols),
+    Row >= 0, Row < Rows,
+    Col >= 0, Col < Cols.
+
+perpendicular(Direction, PerpendicularDirection):-
     (
         (Direction == up ; Direction == down) -> PerpendicularDirection = left-right
         ;
@@ -35,7 +42,17 @@ perpendicular(Direction, PerpendicularDirection) :-
     ).
 
 
-max(A, B, B) :- B >= A, !.
+lmax([H|B], Max):-
+    lmax(B, H, Max).
+
+lmax([], Max, Max).
+
+lmax([H|B], Curr, Max):-
+    (H > Curr -> NewCurr is H; NewCurr is Curr),
+    lmax(B, NewCurr, Max).
+
+
+max(A, B, B):- B >= A, !.
 max(A, _, A).
 
 not(X):- X, !, fail.
@@ -63,16 +80,14 @@ strlen([27|B], N):-
     skip(B, N).
 strlen([''|B], N):-
     skip(B, N).
+strlen([_|T], N):- 
+    strlen(T, N1), 
+    N is N1 + 1.
+strlen(S, N):- 
+    atom_codes(S, L),
+    strlen(L, N).
 
 skip([109|B], N):-
     strlen(B, N).
 skip([_|B], N):-
     skip(B, N).
-
-strlen([H|T], N):- 
-    strlen(T, N1), 
-    N is N1 + 1.
-
-strlen(S, N) :- 
-    atom_codes(S, L),
-    strlen(L, N).
