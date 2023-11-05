@@ -22,6 +22,54 @@ valid_moves(State, ListOfMoves, Row, Column, Size):-
     ),
     valid_moves(State, ListOfMoves, NextRow, NextColumn, Size).
 
+% ------------------------------------------------------------------------------- VALUE
+
+value(State, Value):-
+    % TODO: Implement
+    % 
+    % Parametros:
+    % 1. Checkar o maior segmento do bot            (Positivo)
+    % 2. Checkar o mairo segmento do adversário     (Negativo)
+    % 3. Checkar o número de peças do bot           (Positivo)
+    % 4. Checkar o número de peças do adversário    (Negativo)
+    % 
+    % 
+    !.
+
+% ------------------------------------------------------------------------------- CHOOSE MOVE
+
+choose_move(State, Player, Move):-
+    game_state_pack(State, _, Player, _, 1),
+    length(State, Size),
+    (
+        Player == 'Computer 1' ->
+        (
+            valid_moves(State, ListOfMoves),
+            random_member(Move, ListOfMoves)
+        );
+        Player == 'Computer 2' ->
+        (
+            valid_moves(State, ListOfMoves),
+            random_member(Move, ListOfMoves)
+        )
+    ).
+
+% choose_move(State, Player, Move):-
+%     game_state_pack(State, _, Player, _, 2),
+%     length(State, Size),
+%     (
+%         Player == 'Computer 1' ->
+%         (
+%             valid_moves(State, ListOfMoves),
+
+%         );
+%         Player == 'Computer 2' ->
+%         (
+%             valid_moves(State, ListOfMoves),
+
+%         )
+%     ).
+
 % ------------------------------------------------------------------------------- VALID MOVE
 
 valid_move(State, NewState):-
@@ -42,25 +90,21 @@ valid_move(State, NewState):-
             valid_move(Move, State, NewState); 
             write('Invalid move!\n'), valid_move(State, NewState)
         );
-        (Player == 'Computer 1'; Player == 'Computer 2') ->
+        (Player == 'Computer 1') ->
         (   
-            valid_moves(State, ListOfMoves),
-            random_member(Move, ListOfMoves),
-            valid_move(Move, State, NewState)
+            write('\n\e[93m Computer 1 turn\e[0m\n\n'),
+            choose_move(State, Player, Move),
+            valid_move(Move, State, NewState),
+            sleep(1)
+        );
+        (Player == 'Computer 2') ->
+        (   
+            write('\n\e[95m Computer 2 turn\e[0m\n\n'),
+            choose_move(State, Player, Move),
+            valid_move(Move, State, NewState),
+            sleep(1)
         )
     ).
-
-% valid_move(State, NewState):-
-%     game_state_pack(State, Board, Player, _, _),
-%     length(Board, Size),
-%     (Player == p1 ->
-%         write('\n\e[93m Player 1 turn\e[0m\n\n');
-%         write('\n\e[95m Player 2 turn\e[0m\n\n')
-%     ),
-%     read_move(Size, Move),
-%     valid_move(Move, State, NewState)
-%     ; 
-%     write('Invalid move!\n'), valid_move(State, NewState).
 
 valid_move(Move, State, NewState):-
     game_state_pack(State, Board, _, _, _),
