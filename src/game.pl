@@ -1,5 +1,5 @@
 % ----------------------------------------------------- INITIAL
-initial_state(Player1-Player2-Size-Difficulty, InitialState):-
+initial_state([Player1, Player2, Size, Difficulty], InitialState):-
     create_board(Size, Board),
     game_state_pack(InitialState, Board, Player1, Player2, Difficulty).
 

@@ -1,35 +1,78 @@
+% ------------------------------------------------------------------------------- VALID MOVES
+
+% valid_moves(State, ListOfMoves):-
+%     game_state_pack(State, Board, Player, Opponent, Difficulty),
+%     length(Board, Size1),
+%     Size is Size1 - 1,
+%     findall(Move, 
+%         (
+%             for(X,0,L),
+%             do ( 
+%                 for(Y,0,L),
+%                 param(X)
+%                 do ( 
+%                     Move = X-Y,
+%                     valid_move(Move, State, NewState),
+%                 )
+%             )
+%         ),
+%     ListOfMoves).
+
+% ------------------------------------------------------------------------------- VALID MOVES
+
+valid_moves(State, ListOfMoves):-
+    game_state_pack(State, Board, _, _, _),
+    length(Board, Size),
+    valid_moves(State, ListOfMoves, 0, 0, Size).
+
+valid_moves(_, [], Size, _, Size).
+valid_moves(State, [H|B], Row, Column, Size):-
+    valid_move(Row-Column, State, _),
+    H = Row-Column,
+    (
+        Column == Size -> 
+        NextRow is Row + 1, NextColumn = 0; NextRow = Row, NextColumn is Column + 1
+    ),
+    valid_moves(State, B, NextRow, NextColumn, Size).
+
+valid_moves(State, ListOfMoves, Row, Column, Size):-
+    (
+        Column == Size -> 
+        NextRow is Row + 1, NextColumn = 0; NextRow = Row, NextColumn is Column + 1
+    ),
+    valid_moves(State, ListOfMoves, NextRow, NextColumn, Size).
+
 % ------------------------------------------------------------------------------- VALID MOVE
+
 valid_move(State, NewState):-
-    game_state_pack(State, Board, Player, Opponent, Difficulty),
+    game_state_pack(State, Board, Player, _, _),
     length(Board, Size),
     (Player == p1 ->
         write('\n\e[93m Player 1 turn\e[0m\n\n');
         write('\n\e[95m Player 2 turn\e[0m\n\n')
     ),
     read_move(Size, Move),
-    valid_move(Move, State, NewState).
+    valid_move(Move, State, NewState)
+    ; 
+    write('Invalid move!\n'), valid_move(State, NewState).
 
 valid_move(Move, State, NewState):-
-    game_state_pack(State, Board, Player, Opponent, Difficulty),
+    game_state_pack(State, Board, _, _, _),
     length(Board, Size),
     Size1 is Size - 1,
     Move \= 0-X, Move \= Size1-X, Move \= X-0, Move \= X-Size1,
-    mx_get(Move, Board, x),
+    mx_get(Move, Board, ' '),
     update_board(State, Move, S1),
     check_flanking(Move, S1, NewState, 0).
 
 valid_move(Move, State, NewState):-
-    game_state_pack(State, Board, Player, Opponent, Difficulty),
+    game_state_pack(State, Board, _, _, _),
     length(Board, Size),
     Size1 is Size - 1,
     Move = Row-Column,
     (Row == 0; Row == Size1; Column == 0; Column == Size1),
     check_flanking(Move, State, NewState, 1),
     State \= NewState.
-
-valid_move(Move, State, NewState):-
-    write('Invalid move!\n'),
-    valid_move(State, NewState).
 
 % ------------------------------------------------------------------------------- CHECK FLANKING
 
@@ -47,17 +90,17 @@ get_flank(Position, Direction, State, NewState, 0):-
 
 get_flank(Position, Direction, State, NewState, 1):-
     get_flank_s1(Position, Direction, State, NewState, Flank, Cut),
-    write('Flank: '), write(Flank), nl,
-    write('Cut: '), write(Cut), nl,
+    % write('Flank: '), write(Flank), nl,
+    % write('Cut: '), write(Cut), nl,
     array_cmp(Flank, Cut, Flank).
 
-get_flank(Position, Direction, State, State, _).
+get_flank(_, _, State, State, _).
 
 get_flank_s0(Position, Direction, State, NewState, [Position|Flank], Cut):-
     get_flank_s1(Position, Direction, State, NewState, Flank, Cut).
 
 get_flank_s1(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
+    game_state_pack(State, Board, _, Opponent, _),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
@@ -67,7 +110,7 @@ get_flank_s1(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
     update_board(S1, NewPosition, NewState).
 
 get_flank_s2(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
+    game_state_pack(State, Board, _, Opponent, _),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     perpendicular(Direction, Perpendicular),
@@ -77,7 +120,7 @@ get_flank_s2(Position, Direction, State, NewState, [NewPosition|Flank], Cut):-
     update_board(S1, NewPosition, NewState).
 
 get_flank_s2(Position, Direction, State, State, [NewPosition], []):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
+    game_state_pack(State, Board, CurrentPlayer, _, _),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, CurrentPlayer).
     
@@ -89,37 +132,18 @@ get_cut_s0(Position, Direction1-Direction2, State, Cut):-
     append([Cut1R, [Position], Cut2], Cut).
 
 get_cut_s1(Position, Direction, State, [NewPosition|Cut]):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
+    game_state_pack(State, Board, _, Opponent, _),
     mx_delta(Position, Direction, NewPosition),
     mx_get(NewPosition, Board, Opponent),
     get_cut_s1(NewPosition, Direction, State, Cut),
     !.
 
-get_cut_s1(Position, Direction, State, []):- !.
+get_cut_s1(_, _, _, []):- !.
 
-% ------------------------------------------------------ UPDATE BOARD 
-update_board(State, Move, NewState):-
-    Move = (Row-Column),
-    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
-    place_disc(Row, Column, CurrentPlayer, Board, NewBoard),
-    game_state_pack(NewState, NewBoard, CurrentPlayer, Opponent, Difficulty).
-
-place_disc(0, Column, Element, [H|B], [NewH|B]):-
-    place_disc(Column, Element, H, NewH),
-    !.
-place_disc(Row, Column, Element, [H|B], [H|NewB]):-
-    Row > 0,
-    Row1 is Row - 1,
-    place_disc(Row1, Column, Element, B, NewB).
-place_disc(0, Element, [_|B], [Element|B]) :- !.
-place_disc(I, Element, [H|B], [H|NewB]) :-
-    I > 0,
-    I1 is I - 1,
-    place_disc(I1, Element, B, NewB).
 % ------------------------------------------------------ WINNING CONDITION
 
 game_over(State, Winner):-
-    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
+    game_state_pack(State, Board, _, Opponent, _),
     (check_rows(Opponent, Board) ; check_columns(Opponent, Board)),
     Winner = Opponent.
     

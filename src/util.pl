@@ -36,7 +36,7 @@ perpendicular(Direction, PerpendicularDirection) :-
 
 
 max(A, B, B) :- B >= A, !.
-max(A, B, A).
+max(A, _, A).
 
 not(X):- X, !, fail.
 not(_X).
