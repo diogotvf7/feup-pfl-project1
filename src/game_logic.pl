@@ -140,8 +140,6 @@ get_flank(Position, Direction, State, NewState, 0):-
 
 get_flank(Position, Direction, State, NewState, 1):-
     get_flank_s1(Position, Direction, State, NewState, Flank, Cut),
-    % write('Flank: '), write(Flank), nl,
-    % write('Cut: '), write(Cut), nl,
     array_cmp(Flank, Cut, Flank).
 
 get_flank(_, _, State, State, _).

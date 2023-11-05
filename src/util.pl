@@ -41,10 +41,6 @@ max(A, _, A).
 not(X):- X, !, fail.
 not(_X).
 
-strlen(String, Length):-
-    atom_chars(String, Chars),
-    length(Chars, Length).
-
 center_text(Text, Space):-
     strlen(Text, L),
     Half is (Space-L)/2,
@@ -61,3 +57,22 @@ array_cmp(Array1, Array2, Largest):-
         Length1 > Length2 -> Largest = Array1;
         Length2 >= Length1 -> Largest = Array2
     ).
+
+strlen([], 0).
+strlen([27|B], N):-
+    skip(B, N).
+strlen([''|B], N):-
+    skip(B, N).
+
+skip([109|B], N):-
+    strlen(B, N).
+skip([_|B], N):-
+    skip(B, N).
+
+strlen([H|T], N):- 
+    strlen(T, N1), 
+    N is N1 + 1.
+
+strlen(S, N) :- 
+    atom_codes(S, L),
+    strlen(L, N).
