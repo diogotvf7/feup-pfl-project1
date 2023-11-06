@@ -2,12 +2,12 @@
 :- use_module(library(between)).
 :- use_module(library(random)).
 :- use_module(library(system)).
-:- ['src/game.pl'].
-:- ['src/board.pl'].
-:- ['src/io.pl'].
-:- ['src/game_logic.pl'].
-:- ['src/util.pl'].
-:- ['src/menu.pl'].
+:- ['linux/game.pl'].
+:- ['linux/board.pl'].
+:- ['linux/io.pl'].
+:- ['linux/game_logic.pl'].
+:- ['linux/util.pl'].
+:- ['linux/menu.pl'].
  
 :- 
     cls,

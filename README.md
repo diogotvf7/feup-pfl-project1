@@ -15,22 +15,47 @@ Group: &nbsp;&nbsp;`Crosscut_7`
 
 <table>
 <tr><th>Nome</th><th>Número mecanográfico</th><th>Contribuição</th></tr>
-<tr><td>Diogo Tomás Valente Fernandes</td><td>up202108752</td><td>9999999%</td></tr>
-<tr><td>Hélder Gabriel Silva Costa</td><td>up202108719</td><td>9999999%</td></tr>
+<tr><td>Diogo Tomás Valente Fernandes</td><td>up202108752</td><td>50%</td></tr>
+<tr><td>Hélder Gabriel Silva Costa</td><td>up202108719</td><td>50%</td></tr>
 </table>
 
 ## Installation and Execution
 
-To install and run the game, you need to download and unzip the files in
+### Linux
 
-> PFL_TP1_T06_Crosscut_7.zip.
+1. To install and run the game, you need to download and unzip the files in
 
-Then, you need to run the command
+    > PFL_TP1_T06_Crosscut_7.zip
 
-> make run
+2. Then, in the make file, replace `/usr/local/sicstus4.8.0/bin/sicstus` with the command you use to run Sicstus on your shell, if needed
 
-from the terminal in the main directory.
-SICStus Prolog 4.8 needs to be installed to run the game. If you d
+3. Run the following command on your terminal:
+
+    > make run
+
+### Windows
+
+1. To install and run the game, you need to download and unzip the files in
+
+    > PFL_TP1_T06_Crosscut_7.zip
+
+2. Open a Windows Shell
+
+3. Run the following command:
+
+    > `{Path to your sicstus.exe file}` -l `{Path to the downloaded windows.pl}`
+
+    Example:
+    
+    ```
+    "C:\Program Files\SICStus Prolog VC16 4.8.0\bin\sicstus.exe" -l C:\Users\diogo\OneDrive\Documents\feup-pfl-project1\windows.pl
+    ```
+
+4. You can also consult the `windows.pl` file directly from the Sicstus Prolog Interpreter.
+
+___ 
+
+**`Warning:`** SICStus Prolog 4.8 needs to be installed to run the game.
 
 ## Game Description
 
@@ -150,13 +175,13 @@ The **display_top_indexes/1** displays only a visual helper while **display_rows
 ```prolog
 display_rows([H], N, Size):-
     Size1 is Size - 1,
-    write('    │\e[94m '), write(N), write('\e[0m │'),
+    write('    │\x[94m '), write(N), write('\x[0m │'),
     display_row(H),
     write('    ╰───┴'), write_n_times('───┴', Size1), write('───╯\n').
 display_rows([H|B], N, Size):-
     Size1 is Size - 1,
     N1 is N + 1,
-    write('    │\e[94m '), write(N), write('\e[0m │'),
+    write('    │\x[94m '), write(N), write('\x[0m │'),
     display_row(H),
     write('    ├───┼'), write_n_times('───┼', Size1), write('───┤\n'),
     display_rows(B, N1, Size).
@@ -168,17 +193,17 @@ display_row([H|B]):-
 ```
 
 ```prolog
-display_piece('Player 1') :- write('\e[93m ● \e[0m').
-display_piece('Player 2') :- write('\e[95m ● \e[0m').
-display_piece('Computer 1') :- write('\e[93m ● \e[0m').
-display_piece('Computer 2') :- write('\e[95m ● \e[0m').
+display_piece('Player 1') :- write('\x[93m ● \x[0m').
+display_piece('Player 2') :- write('\x[95m ● \x[0m').
+display_piece('Computer 1') :- write('\x[93m ● \x[0m').
+display_piece('Computer 2') :- write('\x[95m ● \x[0m').
 
-display_piece('bp1') :- write('\e[5;93m ● \e[0m').
-display_piece('bp2') :- write('\e[5;95m ● \e[0m').
-display_piece('bc1') :- write('\e[5;93m ● \e[0m').
-display_piece('bc2') :- write('\e[5;95m ● \e[0m').
+display_piece('bp1') :- write('\x[5;93m ● \x[0m').
+display_piece('bp2') :- write('\x[5;95m ● \x[0m').
+display_piece('bc1') :- write('\x[5;93m ● \x[0m').
+display_piece('bc2') :- write('\x[5;95m ● \x[0m').
 
-display_piece('_') :- write('\e[5;91m _ \e[0m').
+display_piece('_') :- write('\x[5;91m _ \x[0m').
 display_piece(' ') :- write('   ').
 ```
 
