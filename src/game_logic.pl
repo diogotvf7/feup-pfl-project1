@@ -29,12 +29,21 @@ valid_moves(State, ListOfMoves, Row, Column, Size):-
 % ------------------------------------------------------------------------------- VALUE
 
 value(State, Value):-
+    switch_current_player(State, NewState),
+    game_over(NewState, Winner),
+    game_state_pack(State, _, CurrentPlayer, _, _),
+    (
+        Winner == CurrentPlayer -> Value = -10;
+        Winner \== CurrentPlayer -> Value = 10
+    ).
+
+value(State, Value):-
     game_state_pack(State, Board, CurrentPlayer, Opponent, _),
     get_largest_segment(Board, CurrentPlayer, PlayerMaxSeg),
     get_largest_segment(Board, Opponent, OpponentMaxSeg),
     count_pieces(Board, CurrentPlayer, PlayerPieces),
     count_pieces(Board, Opponent, OpponentPieces),
-    Value is PlayerMaxSeg - OpponentMaxSeg + PlayerPieces - OpponentPieces.
+    Value is PlayerMaxSeg * 2 - OpponentMaxSeg * 2 + PlayerPieces - OpponentPieces.
 
 % ------------------------------------------------------------------------------- GET LARGEST SEGMENT
 
@@ -90,7 +99,7 @@ count_pieces_s1([H|T], Player, Count):-
 
 count_pieces_s1([],_,0).
 
-% ------------------------------------------------------------------------------- MINMAX
+% ------------------------------------------------------------------------------- BEST MOVE
 
 best_move(State, BestMove, Depth):-
     game_state_pack(State, Board, Max, _, _),
@@ -98,12 +107,16 @@ best_move(State, BestMove, Depth):-
     depth_value(Max, StartState, BestMove, _, Depth).
 
 depth_value(_, State, _, Val, 0):-
-    value(State, Val), !.
+    value(State, Val).
 
 depth_value(Max, State, BestMove, Val, Depth):-
     Depth1 is Depth - 1,
     switch_current_player(State, NewState),  
-    valid_moves(NewState, ListOfMoves), !,    
+    valid_moves(NewState, ListOfMoves), !,
+    write_n_times('------------------------------------------------------------------------------------', Depth),   
+    write(' Depth: '), write(Depth1), nl,
+    write('State: '), write(NewState), nl,
+    write('Valid moves: '), write(ListOfMoves), nl, nl,
     best_move(Max, NewState, ListOfMoves, BestMove, Val, Depth1);
     value(State, Val).
 
@@ -114,52 +127,34 @@ best_move(Max, State, [Move], Move, Val, Depth):-
 
 best_move(Max, State, [Move1|B], BestMove, BestVal, Depth):-
     valid_move(Move1, State, NewState),
-    depth_value(Max, NewState, _, Val1, Depth1),
+    depth_value(Max, NewState, _, Val1, Depth),
     best_move(Max, State, B, Move2, Val2, Depth),
-    compare_state(Max, NewState, Move1, Val1, Move2, Val2, BestMove, BestVal).
+    compare_state(Max, State, Move1, Val1, Move2, Val2, BestMove, BestVal),
+    write('(Depth '), write(Depth), write(') | '),
+    write('Local best move '), write(BestMove), write(' - '), write(BestVal), nl, nl.
 
 compare_state(Max, State, Move1, Val1, Move2, Val2, Move1, Val1):-
     game_state_pack(State, _, CurrentPlayer, _, _),
+    nl, write('State: '), write(State), nl,
+    write(Move1), write(' : '), write(Val1), write(' points                             '),
+    write(Move2), write(' : '), write(Val2), write(' points\n'),
     (
         CurrentPlayer \== Max, Val1 < Val2, !;
         CurrentPlayer == Max, Val1 > Val2, !
     ).
-
+    
 compare_state(Max, _, _, _, Move2, Val2, Move2, Val2).
 
 % ------------------------------------------------------------------------------- CHOOSE MOVE
 
 choose_move(State, Player, Move):-
-    game_state_pack(State, _, Player, _, 1),
-    % length(State, Size), % ?????????????????????????????????
-    (
-        Player == 'Computer 1' ->
-        (
-            valid_moves(State, ListOfMoves),
-            random_member(Move, ListOfMoves)
-        );
-        Player == 'Computer 2' ->
-        (
-            valid_moves(State, ListOfMoves),
-            random_member(Move, ListOfMoves)
-        )
-    ).
-    % valid_moves(State, ListOfMoves),      % | Nao podemos ter 
-    % random_member(Move, ListOfMoves).     % | so isto??????
+    game_state_pack(State, _, _, _, 1),
+    valid_moves(State, ListOfMoves),
+    random_member(Move, ListOfMoves).
 
 choose_move(State, Player, BestMove):-
-    game_state_pack(State, _, Player, _, 2),
-    length(State, Size),
-    (
-        Player == 'Computer 1' ->
-        (
-            best_move(State, BestMove, 5)
-        );
-        Player == 'Computer 2' ->
-        (
-            best_move(State, BestMove, 5)
-        )
-    ).
+    game_state_pack(State, _, _, _, 2),
+    best_move(State, BestMove, 5).
 
 % ------------------------------------------------------------------------------- VALID MOVE
 
@@ -184,18 +179,20 @@ valid_move(State, NewState):-
         (Player == 'Computer 1') ->
         (   
             write('\n\e[93m Computer 1 turn\e[0m\n\n'),
+            prompt(_, ' PRESS ENTER'),
             choose_move(State, Player, Move),
             valid_move(Move, State, NewState),
-            get_int(_, 0, 0)
-            % sleep(1)
+            get_int(_, 0, 0),
+            prompt(_, '|:')
         );
         (Player == 'Computer 2') ->
         (   
             write('\n\e[95m Computer 2 turn\e[0m\n\n'),
+            prompt(_, ' PRESS ENTER'),
             choose_move(State, Player, Move),
             valid_move(Move, State, NewState),
-            get_int(_, 0, 0)
-            % sleep(1)
+            get_int(_, 0, 0),
+            prompt(_, '|:')
         )
     ).
 

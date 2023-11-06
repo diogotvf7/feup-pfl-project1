@@ -51,6 +51,8 @@ For visual representations and further details on the game rules please visit th
 
 _Game development was entirely based on the rules presented on the previous website._
 
+## Game Logic
+
 ### Internal Game State
 
 Our game state, GameState, used in almost all predicated is a list of 4 elements:
@@ -94,7 +96,7 @@ These are some representations of the game state during different parts of the g
 
 In all our menus we use the predicate **options_menu/2** that represents the passed arguments inside a frame for beauty aspects only.
 
-When a user opens the game he's presented with the main menu **main_menu/1** that allows the user to proceed to game or to a How To Play tab.
+the theonWhen a user opens the game he's presented with the main menu **main_menu/1** that allows the user to proceed to the game or to a How To Play tab.
 
 All the user's choices are based on number choices secured by the **get_int/3** predicate, this predicate only allows the user to input valid numbers.
 
@@ -102,7 +104,7 @@ All the user's choices are based on number choices secured by the **get_int/3** 
 
 //Maybe do how to play ??
 
-In case the user choosed to play, he will be presented with several menus that will allow him to configure the game he will play, including size _(from 5x5 to 10x10)_, mode _(P vs P, P vs AI, AI vs P, AI vs AI)_ and difficulty _(Easy or Hard)_. All these are invoked from the **play_menu/1** predicate and make use of **get_int/3**.
+In case the user chooses to play, he will be presented with several menus that will allow him to configure the game he will play, including size _(from 5x5 to 10x10)_, mode _(P vs P, P vs AI, AI vs P, AI vs AI)_ and difficulty _(Easy or Hard)_. All these are invoked from the **play_menu/1** predicate and make use of **get_int/3**.
 
 //imagens dos menus de configuração
 
@@ -114,11 +116,49 @@ The board is then displayed after every move is made and once when the game. Thi
 
 //imagem do display_game
 
-The **display_top_indexes/1** display only a visual helper while **display_rows/3** is responsible for displaying all the rows including all pieces. It calls a **display_piece/1** predicate responsible for printing the piece in the color associated to the current player.
+The **display_top_indexes/1** displays only a visual helper while **display_rows/3** is responsible for displaying all the rows including all pieces. It calls a **display_piece/1** predicate responsible for printing the piece in the color associated with the current player.
 
 //imagem do display rows
 //imagem do display piece ??
 
 ### Move Validation and Execution
 
-## Game Logic
+The game is based on the cycle invoked in the predicate **play/3**.
+
+//imagem do ciclo dos play3
+
+It displays the current board and then asks the user for a set of coordinates through the **move/2** that then calls the **valid_move/2**, the last predicate is the one that inquires the user and checks if the move in question is valid.
+
+//imagem dos valid move
+
+A move will be considered valid if:
+
+1. Is within the playing area
+2. Is played in an empty coordinate
+3. If played on the borders of the board allows for a flanking move
+
+After it is considered valid and after checking for all possible flankings resulting from such a move, the board is updated with the predicate **update_board/3**.
+
+//update board image ???
+
+### End of Game
+
+After the board is updated the resulting _GameState_ is then checked to see if a winning condition has been reached (**game_over/2**). If so, then a winner menu (**winner_menu/2**) is displayed as well as the final board.
+
+//imagem do game over
+
+### Game State Evaluation
+
+### Computer Plays
+
+## Conclusion
+
+The Crosscut game was successfully implemented in Prolog. It can be played in the 4 modes suggested Player vs Player, Player vs Computer, Computer vs Player and Computer vs Computer with board sizes ranging from 5x5 to 10x10, as anything above that is not recommended by the creator due to possible deadlock issues. We think our game does not have any limitations and is implemented correctly and robustly.
+
+To us, the most challenging parts were the start as we had no experience with Prolog and it's not an easy programming language to get started with as well as the development of the greedy algorithm for smart AI plays. It served as a good way to consolidate and practice the skills acquired in the theoretical and practical classes.
+
+## Bibliography
+
+> [http://marksteeregames.com/Crosscut_rules.pdf](http://marksteeregames.com/Crosscut_rules.pdf)
+>
+> [https://silp.iiita.ac.in/wp-content/uploads/PROLOG.pdf](https://silp.iiita.ac.in/wp-content/uploads/PROLOG.pdf)
