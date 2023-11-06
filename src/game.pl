@@ -68,6 +68,3 @@ play(Curr, Path, States):-
     cls,
     not( member(Next, Path) ),
     play(Next, [Next|Path], States).
-
- 
-

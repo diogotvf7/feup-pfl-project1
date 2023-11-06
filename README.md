@@ -82,15 +82,21 @@ These are some representations of the game state during different parts of the g
 
 > Initial game state
 
-![Initial Game State](assets/images/InitGameStateText.png)
+|                     Board Display                      |                           Game State                            |
+| :----------------------------------------------------: | :-------------------------------------------------------------: |
+| ![Initial Game Board](assets/images/InitGameState.png) | ![Initial Game State Text](assets/images/InitGameStateText.png) |
 
 > Mid game state
 
-![Mid Game State](assets/images/MidGameStateText.png)
+|                   Board Display                   |                         Game State                         |
+| :-----------------------------------------------: | :--------------------------------------------------------: |
+| ![Mid Game Board](assets/images/MidGameState.png) | ![Mid Game State Text](assets/images/MidGameStateText.png) |
 
 > Final game state
 
-![Final Game State](assets/images/FinalGameStateText.png)
+|                     Board Display                     |                           Game State                           |
+| :---------------------------------------------------: | :------------------------------------------------------------: |
+| ![Final Game Board](assets/images/FinalGameState.png) | ![Final Game State Text](assets/images/FinalGameStateText.png) |
 
 ### Game State Visualization
 
@@ -108,28 +114,134 @@ In case the user chooses to play, he will be presented with several menus that w
 
 //imagens dos menus de configuração
 
-//imagem do get_int ?
+```prolog
+get_int(N):-
+    get_int(0, N).
+
+get_int(N, Bottom, Top):-
+    get_int(0, Input),
+    (between(Bottom, Top, Input) -> N = Input; get_int(N, Bottom, Top)).
+
+get_int(N, N):-
+    peek_code(10),
+    get_code(10),
+    !.
+
+get_int(Current, Result):-
+    get_code(Input),
+    between(48, 57, Input),
+    New is Current * 10 + (Input - 48),
+    get_int(New, Result).
+```
 
 After, the config chosen is passed to the **initial_state/2** predicate that creates the board.
 
 The board is then displayed after every move is made and once when the game. This is triggered by the **display_game/1** predicate.
 
-//imagem do display_game
+```prolog
+display_game(Board):-
+    length(Board, Size),
+    display_top_indexes(Size),
+    display_rows(Board, 0, Size).
+```
 
 The **display_top_indexes/1** displays only a visual helper while **display_rows/3** is responsible for displaying all the rows including all pieces. It calls a **display_piece/1** predicate responsible for printing the piece in the color associated with the current player.
 
-//imagem do display rows
-//imagem do display piece ??
+```prolog
+display_rows([H], N, Size):-
+    Size1 is Size - 1,
+    write('    │\e[94m '), write(N), write('\e[0m │'),
+    display_row(H),
+    write('    ╰───┴'), write_n_times('───┴', Size1), write('───╯\n').
+display_rows([H|B], N, Size):-
+    Size1 is Size - 1,
+    N1 is N + 1,
+    write('    │\e[94m '), write(N), write('\e[0m │'),
+    display_row(H),
+    write('    ├───┼'), write_n_times('───┼', Size1), write('───┤\n'),
+    display_rows(B, N1, Size).
+display_row([H]):-
+    display_piece(H), write('│\n').
+display_row([H|B]):-
+    display_piece(H), write('│'),
+    display_row(B).
+```
+
+```prolog
+display_piece('Player 1') :- write('\e[93m ● \e[0m').
+display_piece('Player 2') :- write('\e[95m ● \e[0m').
+display_piece('Computer 1') :- write('\e[93m ● \e[0m').
+display_piece('Computer 2') :- write('\e[95m ● \e[0m').
+
+display_piece('bp1') :- write('\e[5;93m ● \e[0m').
+display_piece('bp2') :- write('\e[5;95m ● \e[0m').
+display_piece('bc1') :- write('\e[5;93m ● \e[0m').
+display_piece('bc2') :- write('\e[5;95m ● \e[0m').
+
+display_piece('_') :- write('\e[5;91m _ \e[0m').
+display_piece(' ') :- write('   ').
+```
 
 ### Move Validation and Execution
 
 The game is based on the cycle invoked in the predicate **play/3**.
 
-//imagem do ciclo dos play3
+```prolog
+play:-
+    main_menu(Input),
+    (
+        Input == 1 -> (
+            play_menu(Config),
+            initial_state(Config, Init),
+            play(Init, [Init], States),
+            reverse(States, Path), write(Path),
+            play
+        );
+        Input == 2 ->(
+            rules_menu,
+            play
+        );
+        Input == 3 ->(
+            exit_menu(Exit_Input),
+            Exit_Input == 2 -> play ; cls, halt
+        )
+    ).
+
+play(Curr, Path, Path):-
+    final(Curr),
+    !.
+
+play(Curr, Path, States):-
+    game_state_pack(Curr, Board, CurrentPlayer, Opponent, Difficulty),
+    display_game(Board),
+    move(Curr, S1),
+    switch_current_player(S1, Next),
+    cls,
+    not( member(Next, Path) ),
+    play(Next, [Next|Path], States).
+```
 
 It displays the current board and then asks the user for a set of coordinates through the **move/2** that then calls the **valid_move/2**, the last predicate is the one that inquires the user and checks if the move in question is valid.
 
-//imagem dos valid move
+```prolog
+valid_move(Move, State, NewState):-
+    game_state_pack(State, Board, _, _, _),
+    length(Board, Size),
+    Size1 is Size - 1,
+    Move \= 0-X, Move \= Size1-X, Move \= X-0, Move \= X-Size1,
+    mx_get(Move, Board, ' '),
+    update_board(State, Move, S1),
+    check_flanking(Move, S1, NewState, 0).
+
+valid_move(Move, State, NewState):-
+    game_state_pack(State, Board, _, _, _),
+    length(Board, Size),
+    Size1 is Size - 1,
+    Move = Row-Column,
+    (Row == 0; Row == Size1; Column == 0; Column == Size1),
+    check_flanking(Move, State, NewState, 1),
+    State \= NewState.
+```
 
 A move will be considered valid if:
 
@@ -139,13 +251,24 @@ A move will be considered valid if:
 
 After it is considered valid and after checking for all possible flankings resulting from such a move, the board is updated with the predicate **update_board/3**.
 
-//update board image ???
+```prolog
+update_board(State, Move, NewState):-
+    Move = (Row-Column),
+    game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
+    place_disc(Row, Column, CurrentPlayer, Board, NewBoard),
+    game_state_pack(NewState, NewBoard, CurrentPlayer, Opponent, Difficulty).
+```
 
 ### End of Game
 
 After the board is updated the resulting _GameState_ is then checked to see if a winning condition has been reached (**game_over/2**). If so, then a winner menu (**winner_menu/2**) is displayed as well as the final board.
 
-//imagem do game over
+```prolog
+game_over(State, Winner):-
+    game_state_pack(State, Board, _, Opponent, _),
+    (check_rows(Opponent, Board) ; check_columns(Opponent, Board)),
+    Winner = Opponent.
+```
 
 ### Game State Evaluation
 

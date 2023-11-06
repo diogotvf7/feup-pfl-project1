@@ -1,4 +1,8 @@
 % ------------------------------------------------------ CREATE BOARD
+/**
+* Creates a line of the empty board
+*   create_line(+N, -LINE)
+*/
 create_line(0, []) :- !.
 create_line(N, LINE) :-
     N > 0,
@@ -6,6 +10,11 @@ create_line(N, LINE) :-
     create_line(N1, NEW_LINE),
     append([' '], NEW_LINE, LINE).
 
+/**
+* Creates the initial empty board
+*   create_board(+N, -BOARD)
+*   create_board(+N, +I, -BOARD)
+*/
 create_board(N, BOARD) :-
     create_board(N, N, BOARD).
 create_board(_, 0, []).
@@ -18,6 +27,10 @@ create_board(N, I, BOARD) :-
 
 % ------------------------------------------------------ UPDATE BOARD 
 
+/**
+* Updates the board according to the received move and creates a new state
+*   update_board(+State, +Move, -NewState)
+*/
 update_board(State, Move, NewState):-
     Move = (Row-Column),
     game_state_pack(State, Board, CurrentPlayer, Opponent, Difficulty),
@@ -26,6 +39,10 @@ update_board(State, Move, NewState):-
 
 % ------------------------------------------------------ PLACE DISC 
 
+/**
+* Places a piece in the given row-column
+*   place_disc(+Row, +Column, +Element, +[H|B], -[H|NewH])
+*/
 place_disc(0, Column, Element, [H|B], [NewH|B]):-
     place_disc(Column, Element, H, NewH),
     !.
