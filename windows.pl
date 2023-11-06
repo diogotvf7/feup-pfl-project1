@@ -2,12 +2,12 @@
 :- use_module(library(between)).
 :- use_module(library(random)).
 :- use_module(library(system)).
-:- ['windows/game.pl'].
-:- ['windows/board.pl'].
-:- ['windows/io.pl'].
-:- ['windows/game_logic.pl'].
-:- ['windows/util.pl'].
-:- ['windows/menu.pl'].
+:- ['src/windows/game.pl'].
+:- ['src/windows/board.pl'].
+:- ['src/windows/io.pl'].
+:- ['src/windows/game_logic.pl'].
+:- ['src/windows/util.pl'].
+:- ['src/windows/menu.pl'].
  
 :- 
     cls,

@@ -25,35 +25,35 @@ Group: &nbsp;&nbsp;`Crosscut_7`
 
 1. To install and run the game, you need to download and unzip the files in
 
-    > PFL_TP1_T06_Crosscut_7.zip
+   > PFL_TP1_T06_Crosscut_7.zip
 
 2. Then, in the make file, replace `/usr/local/sicstus4.8.0/bin/sicstus` with the command you use to run Sicstus on your shell, if needed
 
 3. Run the following command on your terminal:
 
-    > make run
+   > make run
 
 ### Windows
 
 1. To install and run the game, you need to download and unzip the files in
 
-    > PFL_TP1_T06_Crosscut_7.zip
+   > PFL_TP1_T06_Crosscut_7.zip
 
 2. Open a Windows Shell
 
 3. Run the following command:
 
-    > `{Path to your sicstus.exe file}` -l `{Path to the downloaded windows.pl}`
+   > `{Path to your sicstus.exe file}` -l `{Path to the downloaded windows.pl}`
 
-    Example:
-    
-    ```
-    "C:\Program Files\SICStus Prolog VC16 4.8.0\bin\sicstus.exe" -l C:\Users\diogo\OneDrive\Documents\feup-pfl-project1\windows.pl
-    ```
+   Example:
+
+   ```
+   "C:\Program Files\SICStus Prolog VC16 4.8.0\bin\sicstus.exe" -l C:\Users\diogo\OneDrive\Documents\feup-pfl-project1\windows.pl
+   ```
 
 4. You can also consult the `windows.pl` file directly from the Sicstus Prolog Interpreter.
 
-___ 
+---
 
 **`Warning:`** SICStus Prolog 4.8 needs to be installed to run the game.
 
@@ -101,7 +101,7 @@ Our game state, GameState, used in almost all predicated is a list of 4 elements
 > <br>
 > </br>
 
-Every time a player makes a move we evaluate the resulting game state and its possible conclusion with the **game_over/2** predicate.
+Every time a player makes a move we evaluate the resulting game state and its possible conclusion with the `game_over/2` predicate.
 
 These are some representations of the game state during different parts of the game.
 
@@ -125,19 +125,17 @@ These are some representations of the game state during different parts of the g
 
 ### Game State Visualization
 
-In all our menus we use the predicate **options_menu/2** that represents the passed arguments inside a frame for beauty aspects only.
+In all our menus we use the predicate `options_menu/2` that represents the passed arguments inside a frame for beauty aspects only.
 
 the theonWhen a user opens the game he's presented with the main menu **main_menu/1** that allows the user to proceed to the game or to a How To Play tab.
 
-All the user's choices are based on number choices secured by the **get_int/3** predicate, this predicate only allows the user to input valid numbers.
+All the user's choices are based on number choices secured by the `get_int/3` predicate, this predicate only allows the user to input valid numbers.
 
-//imagem do main menu
+|                Main Menu                 |                   How to Play Menu                   |
+| :--------------------------------------: | :--------------------------------------------------: |
+| ![Main Menu](assets/images/MainMenu.png) | ![How to Play Menu](assets/images/HowToPlayMenu.png) |
 
-//Maybe do how to play ??
-
-In case the user chooses to play, he will be presented with several menus that will allow him to configure the game he will play, including size _(from 5x5 to 10x10)_, mode _(P vs P, P vs AI, AI vs P, AI vs AI)_ and difficulty _(Easy or Hard)_. All these are invoked from the **play_menu/1** predicate and make use of **get_int/3**.
-
-//imagens dos menus de configuração
+In case the user chooses to play, he will be presented with several menus that will allow him to configure the game he will play, including size _(from 5x5 to 10x10)_, mode _(P vs P, P vs AI, AI vs P, AI vs AI)_ and difficulty _(Easy or Hard)_. All these are invoked from the **play_menu/1** predicate and make use of `get_int/3`.
 
 ```prolog
 get_int(N):-
@@ -159,7 +157,7 @@ get_int(Current, Result):-
     get_int(New, Result).
 ```
 
-After, the config chosen is passed to the **initial_state/2** predicate that creates the board.
+After, the config chosen is passed to the `initial_state/2` predicate that creates the board.
 
 The board is then displayed after every move is made and once when the game. This is triggered by the **display_game/1** predicate.
 
@@ -170,7 +168,7 @@ display_game(Board):-
     display_rows(Board, 0, Size).
 ```
 
-The **display_top_indexes/1** displays only a visual helper while **display_rows/3** is responsible for displaying all the rows including all pieces. It calls a **display_piece/1** predicate responsible for printing the piece in the color associated with the current player.
+The **display_top_indexes/1** displays only a visual helper while `display_rows/3` is responsible for displaying all the rows including all pieces. It calls a **display_piece/1** predicate responsible for printing the piece in the color associated with the current player.
 
 ```prolog
 display_rows([H], N, Size):-
@@ -209,7 +207,7 @@ display_piece(' ') :- write('   ').
 
 ### Move Validation and Execution
 
-The game is based on the cycle invoked in the predicate **play/3**.
+The game is based on the cycle invoked in the predicate `play/3`.
 
 ```prolog
 play:-
@@ -246,7 +244,7 @@ play(Curr, Path, States):-
     play(Next, [Next|Path], States).
 ```
 
-It displays the current board and then asks the user for a set of coordinates through the **move/2** that then calls the **valid_move/2**, the last predicate is the one that inquires the user and checks if the move in question is valid.
+It displays the current board and then asks the user for a set of coordinates through the `move/2` that then calls the `valid_move/2`, the last predicate is the one that inquires the user and checks if the move in question is valid.
 
 ```prolog
 valid_move(Move, State, NewState):-
@@ -274,7 +272,7 @@ A move will be considered valid if:
 2. Is played in an empty coordinate
 3. If played on the borders of the board allows for a flanking move
 
-After it is considered valid and after checking for all possible flankings resulting from such a move, the board is updated with the predicate **update_board/3**.
+After it is considered valid and after checking for all possible flankings resulting from such a move, the board is updated with the predicate `update_board/3`.
 
 ```prolog
 update_board(State, Move, NewState):-
@@ -286,7 +284,7 @@ update_board(State, Move, NewState):-
 
 ### End of Game
 
-After the board is updated the resulting _GameState_ is then checked to see if a winning condition has been reached (**game_over/2**). If so, then a winner menu (**winner_menu/2**) is displayed as well as the final board.
+After the board is updated the resulting _GameState_ is then checked to see if a winning condition has been reached (`game_over/2`). If so, then a winner menu (`winner_menu/2`) is displayed as well as the final board.
 
 ```prolog
 game_over(State, Winner):-
@@ -297,13 +295,61 @@ game_over(State, Winner):-
 
 ### Game State Evaluation
 
+The game state is evaluated with the `value/2` predicate. This predicate is used by the computer to evaluate the current game state and decide which move to make.
+This predicate relies on 2 other predicates, `get_largest_segment/3` and `count_pieces/3`. The first one is used to get the largest segment of a player in the current game state and the second one is used to count the number of pieces of a player in the current game state.
+By using these 2 predicates we can evaluate the current game state and give it a value. The higher the value, the better the game state is for the computer.
+The first predicate below is a special case for when the game is over. In this case, 10 extra points are added to boost the value of the game state.
+
+```prolog
+value(State, Value):-
+    switch_current_player(State, NewState),
+    game_over(NewState, Winner), !,
+    game_state_pack(State, Board, CurrentPlayer, Opponent, _),
+    get_largest_segment(Board, CurrentPlayer, PlayerMaxSeg),
+    get_largest_segment(Board, Opponent, OpponentMaxSeg),
+    count_pieces(Board, CurrentPlayer, PlayerPieces),
+    count_pieces(Board, Opponent, OpponentPieces),
+    Value is 10 + PlayerMaxSeg * 2 - OpponentMaxSeg * 2 + PlayerPieces - OpponentPieces.
+    Value = 10.
+
+value(State, Value):-
+    game_state_pack(State, Board, CurrentPlayer, Opponent, _),
+    get_largest_segment(Board, CurrentPlayer, PlayerMaxSeg),
+    get_largest_segment(Board, Opponent, OpponentMaxSeg),
+    count_pieces(Board, CurrentPlayer, PlayerPieces),
+    count_pieces(Board, Opponent, OpponentPieces),
+    Value is PlayerMaxSeg * 2 - OpponentMaxSeg * 2 + PlayerPieces - OpponentPieces.
+```
+
 ### Computer Plays
+
+The computer moves are decided by the `best_move/3` predicate. This predicate has two variants. The first one is used when the computer is playing in easy mode and the second one is used when the computer is playing in hard mode.
+The easy mode only generates all the possible moves and picks one randomly.
+The hard mode relies on the minimax algorithm `best_move/3` to decide which move to make. The depth of the minimax algorithm is decided according to the size of the board. The smaller the board, the deeper the minimax algorithm goes to make the game faster.
+
+```prolog
+choose_move(State, Player, Move):-
+    game_state_pack(State, _, _, _, 1),
+    valid_moves(State, ListOfMoves),
+    random_member(Move, ListOfMoves).
+
+choose_move(State, Player, BestMove):-
+    game_state_pack(State, Board, _, _, 2),
+    length(Board, Size),
+    (
+        (Size == 10; Size == 9; Size == 8) -> Depth = 2;
+        Size == 7  -> Depth = 3;
+        Size == 6  -> Depth = 4;
+        Size == 5  -> Depth = 6
+    ),
+    best_move(State, BestMove, Depth).
+```
 
 ## Conclusion
 
 The Crosscut game was successfully implemented in Prolog. It can be played in the 4 modes suggested Player vs Player, Player vs Computer, Computer vs Player and Computer vs Computer with board sizes ranging from 5x5 to 10x10, as anything above that is not recommended by the creator due to possible deadlock issues. We think our game does not have any limitations and is implemented correctly and robustly.
 
-To us, the most challenging parts were the start as we had no experience with Prolog and it's not an easy programming language to get started with as well as the development of the greedy algorithm for smart AI plays. It served as a good way to consolidate and practice the skills acquired in the theoretical and practical classes.
+For us, the most challenging parts were the start as we had no experience with Prolog and it's not an easy programming language to get started with as well as the development of the greedy algorithm for smart AI plays. It served as a good way to consolidate and practice the skills acquired in the theoretical and practical classes.
 
 ## Bibliography
 
